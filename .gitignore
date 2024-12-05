@@ -1,0 +1,12 @@
+# Dependency directory
+node_modules
+
+# Environment variables
+.env
+.env.*
+
+# DB
+*.db
+
+# Build directory
+dist
