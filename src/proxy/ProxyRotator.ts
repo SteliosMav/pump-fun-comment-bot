@@ -13,7 +13,6 @@ export class ProxyRotator {
   getNextProxy() {
     const proxy = this.proxies[this.index];
     this.index = (this.index + 1) % this.proxies.length; // Cycle back to the start
-    console.log("Current proxy index: ", this.index);
     return proxy;
   }
 }

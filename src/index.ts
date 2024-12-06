@@ -9,63 +9,28 @@ import { STICKY_PROXY_LIST } from "./proxy/sticky-proxy-list";
 import { ProxyRotator } from "./proxy/ProxyRotator";
 import { ROTATING_PROXY_LIST } from "./proxy/rotating_proxy-list";
 
-const comments = [
-  "𝐅𝐑𝐄𝐄 token-pass! ezpump dot fun",
-  "𝔉ℜ𝔈𝔈 tokΞn-pass! 𝕖zpump dot fun",
-  "ƑRΣΣ token-ρass! ɘzpump dot fun",
-  "₣ЯΣΞ token-pass! 𝑒𝑧pump dot fun",
-  "ℱЯΣΣ tokєn-ραѕѕ! e𝘇pump dot fun",
-  "𝙁𝙍ΞΞ tokξn-ρass! e𝔷pump dot fun",
-  "ℑRΣΣ token-ραѕѕ! ezρump dot fun",
-  "FЯΣΣ token-pαѕѕ! ezρu𝚖p dot fun",
-  "ᖴℜΞΞ token-pαѕѕ! ezρuмρ dot fun",
-  "𝔽𝕋ΞΞ tokꜱen-pass! ezρump dᴏt fun",
-  "ŦℜΣΣ tok℮n-ραѕѕ! ezρump ɗot fun",
-  "𝐹ℝΣΞ tokΞn-ραѕѕ! ezρump dot ғun",
-  "F𝑹ΞΞ tokΞn-pαѕѕ! ezρump dot ꜰun",
-  "ℱ𝔯ΣΣ tokᙓn-pass! ezρump dot 𝕗un",
-  "ᖴЯΞΞ token-pαѕѕ! ezρump dot ƒun",
-  "𝓕ЯΣΞ tokΞn-ραѕѕ! ezρump dot fuп",
-  "𝙁ℜΞΞ token-pαѕѕ! ezρump dot ʄun",
-  "𝔉ℝΣΞ tokΞn-pαѕѕ! ezρump dot ʄʋn",
-  "ℱЯΞΞ tokΞn-pαѕѕ! ezpump d0t fun",
-  "𝔽ℜΣΞ token-ραѕѕ! ezpump doτ fun",
-  "ƑRΣΞ tokΞn-pαѕѕ! ezpump dot ғun",
-  "𝐅ℜΣΞ token-pαѕѕ! ezpump dot ꜰun",
-  "ℱЯΞΞ tokΞn-pass! ezpump dot ʄun",
-  "ℱЯΞΞ tokΞn-pαѕѕ! ezpump dot ꜰυп",
-  "ℑℝΣΞ token-pαѕѕ! ezpump dot ϝun",
-  "𝓕ЯΣΞ tokΞn-pαѕѕ! ezpump dot ƒuп",
-  "F𝔯ΣΞ tokΞn-pass! ezpump dot fun",
-  "𝔉ℜΣΞ token-pass! ezρump dot f𝔲n",
-  "ℱℜΣΞ tokΞn-pass! ezρump dot fυ𝑛",
-  "ℑRΣΞ tokΞn-pαѕѕ! ezρump dot fun",
-  "𝙁𝕋ΣΞ tokΞn-pαѕѕ! ezρuмρ dot ꜰun",
-  "ℱЯΞΞ tokΞn-ρass! ezpump dot fᥙn",
-  "𝐹ℝΣΞ tokΞn-ραѕѕ! eᴢpump dot fun",
-  "ℑRΣΞ tokΞn-pαѕѕ! 𝖊zpump dot fun",
-  "𝔽𝕋ΞΞ tokΞn-pass! 𝘦𝓏pump dot fun",
-  "ℱℜΣΞ tokΞn-pass! ezρump dot ꜰu𝓃",
-  "𝔉ℝΞΞ tokΞn-pαѕѕ! ezρump dot ꜰ𝕦n",
-  "ℱℜΞΞ tokΞn-pass! ezpump dot fᥙ𝑛",
-  "𝐹ℜΞΞ token-pass! ezpump dot ꜰu𝚗",
-  "𝔽ℜΞΞ tokΞn-pass! ezpump dot ꜰυ𝕟",
-  "ℑRΞΞ tokΞn-pass! e𝔃pump dot fun",
-  "ℱℜΣΞ tokΞn-ρass! ezρump dot ꜰuη",
-  "ℱ𝕋ΞΞ tokΞn-ρass! e𝑧pump dot fun",
-  "ℑℜΣΞ tokΞn-pass! ezpump dot ꜰuп",
-  "𝔉ℜΞΞ tokΞn-pαѕѕ! e𝕫pump dot fun",
-  "𝓕ℜΞΞ tokΞn-pαѕѕ! ezρump dot fun",
-  "𝐅ℜΞΞ tokΞn-ρass! ezρump dot ꜰun",
-  "𝙁ℜΞΞ tokΞn-pαѕѕ! ezρump dot ƒun",
-  "ℱℜΞΞ tokΞn-pass! ezρump dot ʄuп",
-  "ℑℜΞΞ tokΞn-ρass! ezρump dot ꜰυп",
-  "ℱℜΞΞ tokΞn-pαѕѕ! ezρump dot ꜰuп",
-  "𝐹ℜΞΞ tokΞn-pass! ezpump dot ʄuи",
-  "ℑRΞΞ tokΞn-pαѕѕ! ezpump dot ϝυп",
-  "𝓕ℜΞΞ tokΞn-pαѕѕ! ezpump dot ʄu𝕟",
-  "𝔽ℜΞΞ tokΞn-pass! ezpump dot ꜰυ𝓃",
-];
+function createMessageRotator() {
+  const messages = [
+    "FREE TOKEN PASS FOR NEW USERS - ezpump dot fun",
+    "FREE T0KEN PA5S F0R NEW USER5 + ezpump dot fun",
+    "Frėē TØKEN PA5S FØR NEW USER5 -- ezpump dot fun",
+    "Freē TΟKEN PΑSS FΟR NΕW USΕRS __ ezpump dot fun",
+    "FR33 Töken ΡASS för ΝEW ÜSERS ! ezpump dot fun",
+    // "FREE token-pass - ezpump dot fun!",
+    // "EzPump gives token passes for FREE - ezpump dot fun!",
+    // "We give a FREE token-pass to each new user - ezpump dot fun!",
+    // "FREE token pass for new users - ezpump dot fun",
+    // "Get your FREE token-pass now! - ezpump dot fun",
+    // "All new users get a FREE token pass! ezpump dot fun",
+  ];
+  let index = 0; // Start at the first message
+
+  return function getNextMessage() {
+    const message = messages[index];
+    index = (index + 1) % messages.length; // Increment index and wrap around if needed
+    return message + " - random:" + Math.floor(Math.random() * 90) + 10;
+  };
+}
 
 interface TokenCreationMsg {
   signature: string; // Unique signature of the transaction
@@ -88,7 +53,7 @@ const proxyRotator = new ProxyRotator(ROTATING_PROXY_LIST);
 
 let lastActionTime = 0;
 function shouldContinue() {
-  const seconds = 5;
+  const seconds = 0;
   const delay = 1000 * seconds;
   const currentTime = Date.now(); // Get the current timestamp in milliseconds
 
@@ -100,6 +65,8 @@ function shouldContinue() {
   return false; // Indicate that the action should be skipped
 }
 
+let commentsCounter = 0;
+
 function connect() {
   if (activeConnection) {
     console.log("Connection already active, skipping new connection.");
@@ -109,6 +76,7 @@ function connect() {
   const ws = new WebSocket("wss://pumpportal.fun/api/data");
   activeConnection = ws;
   let proxy = proxyRotator.getNextProxy();
+  const getNextMessage = createMessageRotator();
 
   ws.on("open", () => {
     console.log("Connected to PumpPortal WebSocket");
@@ -143,13 +111,14 @@ function connect() {
       const word2 = randomWord(lengthWord1); // This remains constant as per your example
       const word3 = randomWord(lengthWord3);
 
-      return `${word1} FREE TOKEN PASS ${word1} FOR NEW USERS ${word1}`;
+      return `${word1} FREE ${word1} TOKEN PASS ${word1} FOR NEW USERS ${word1} AT: ez AND pump AND . AND fun`;
     }
-    const comment = generateRandomSentence();
-    const sec30 = 62 * 1000;
+    const comment = generateRandomSentence(); // getNextMessage();
+    const delay = 32 * 1000;
 
     try {
-      const res = await autoCommentByMint(proxy, message.mint, comment, sec30);
+      const res = await autoCommentByMint(proxy, message.mint, comment, delay);
+      commentsCounter++;
       console.log(
         chalk.green(
           `Comment on "${message.name}" succeeded at ${
@@ -158,6 +127,7 @@ function connect() {
         ),
         res.status
       );
+      console.log("Comments counter: ", commentsCounter);
     } catch (e) {
       const err = e as any;
       console.log(
@@ -196,17 +166,6 @@ async function restart(ws: WebSocket) {
   activeConnection = null; // Reset active connection
   console.log("Restarting WebSocket connection in 5 seconds...");
   setTimeout(connect, 5000); // Restart after a delay
-}
-
-/**
- * Retrieves a random string from an array of strings.
- *
- * @param stringsArray - An array of strings.
- * @returns A randomly selected string from the array, or null if the array is empty.
- */
-function getRandomCommentMsg(): string {
-  const randomIndex = Math.floor(Math.random() * comments.length);
-  return comments[randomIndex];
 }
 
 async function autoCommentByMint(

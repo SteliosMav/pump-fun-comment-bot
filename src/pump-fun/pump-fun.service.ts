@@ -88,7 +88,7 @@ export class PumpFunService {
         ...this._pumpFunHeaders,
         Cookie: authCookie, // Add the auth cookie to the headers
       },
-      data: payload,
+      data: { ...payload },
       httpsAgent: agent, // Proxy support
     };
 
