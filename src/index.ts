@@ -102,12 +102,12 @@ function connect() {
   ws.on("message", async (data) => {
     const message: TokenCreationMsg = JSON.parse(data.toString());
 
-    // function getNextComment() {
-    //   const comment = comments[currentMsgIdx];
-    //   currentMsgIdx = (currentMsgIdx + 1) % comments.length; // Move to the next comment, wrap around at the end
-    //   return comment;
-    // }
-    // let comment = getNextComment();
+    function getNextComment() {
+      const comment = comments[currentMsgIdx];
+      currentMsgIdx = (currentMsgIdx + 1) % comments.length; // Move to the next comment, wrap around at the end
+      return comment;
+    }
+
     function generateRandomSentence() {
       function randomWord(length: number) {
         const letters = "abcdefghijklmnopqrstuvwxyz";
@@ -125,18 +125,28 @@ function connect() {
       return `${word1} ${word2} ${word3}`;
     }
     const comment = generateRandomSentence();
+    // const comment = getNextComment();
+    const sec30 = 30 * 1000;
 
     try {
-      const res = await autoCommentByMint(message.mint, comment);
+      const res = await autoCommentByMint(message.mint, comment, sec30);
       console.log(
         chalk.green(`Comment on "${message.name}" succeeded! Res:`),
         res.status
       );
     } catch (e) {
-      const err = e as any;
-      console.log(
-        chalk.red(`Comment on "${message.name}" failed: ${err.status}`)
-      );
+      try {
+        const res = await autoCommentByMint(message.mint, comment);
+        console.log(
+          chalk.green(`Comment on "${message.name}" succeeded! Res:`),
+          res.status
+        );
+      } catch (e) {
+        const err = e as any;
+        console.log(
+          chalk.red(`Comment on "${message.name}" failed: ${err.status}`)
+        );
+      }
     }
   });
 
@@ -185,7 +195,8 @@ function getRandomCommentMsg(): string {
 
 async function autoCommentByMint(
   mint: string,
-  msg?: string
+  msg?: string,
+  delay?: number
 ): Promise<AxiosResponse> {
   const commentTxt = msg ? msg : "FREE token-pass! ezpump dot fun";
   const pumpFunService = new PumpFunService();
@@ -247,7 +258,7 @@ async function autoCommentByMint(
           reject(e);
         }
       }
-    }, 33000);
+    }, delay);
   });
 }
 
