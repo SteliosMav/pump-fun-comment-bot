@@ -1,7 +1,7 @@
-import { PROXY_LIST } from "./proxy-list";
+import { ROTATING_PROXY_LIST } from "./rotating_proxy-list";
 
 export function getRandomProxy() {
-  const proxyList = PROXY_LIST;
+  const proxyList = ROTATING_PROXY_LIST;
   const randomIndex = Math.floor(Math.random() * proxyList.length);
   return proxyList[randomIndex];
 }

@@ -1,4 +1,4 @@
-export const PROXY_LIST = [
+export const ROTATING_PROXY_LIST = [
   "http://geonode_sDRozcIvf5:92553e1a-4edd-4899-b8c9-d7de3b1bcb0f@premium-residential.geonode.com:9000",
   "http://geonode_sDRozcIvf5:92553e1a-4edd-4899-b8c9-d7de3b1bcb0f@premium-residential.geonode.com:9001",
   "http://geonode_sDRozcIvf5:92553e1a-4edd-4899-b8c9-d7de3b1bcb0f@premium-residential.geonode.com:9002",

@@ -5,6 +5,9 @@ import { getRandomProxy } from "./proxy/getRandomProxy";
 import { BOT_DESCRIPTION, BOT_IMAGE_GIF } from "./constants";
 import WebSocket from "ws";
 import { AxiosError, AxiosResponse } from "axios";
+import { STICKY_PROXY_LIST } from "./proxy/sticky-proxy-list";
+import { ProxyRotator } from "./proxy/ProxyRotator";
+import { ROTATING_PROXY_LIST } from "./proxy/rotating_proxy-list";
 
 const comments = [
   "𝐅𝐑𝐄𝐄 token-pass! ezpump dot fun",
@@ -81,6 +84,21 @@ interface TokenCreationMsg {
 
 // Track active connection
 let activeConnection: WebSocket | null = null;
+const proxyRotator = new ProxyRotator(ROTATING_PROXY_LIST);
+
+let lastActionTime = 0;
+function shouldContinue() {
+  const seconds = 5;
+  const delay = 1000 * seconds;
+  const currentTime = Date.now(); // Get the current timestamp in milliseconds
+
+  if (currentTime - lastActionTime >= delay) {
+    lastActionTime = currentTime; // Update the last action time
+    return true; // Indicate that the action can proceed
+  }
+
+  return false; // Indicate that the action should be skipped
+}
 
 function connect() {
   if (activeConnection) {
@@ -90,7 +108,7 @@ function connect() {
 
   const ws = new WebSocket("wss://pumpportal.fun/api/data");
   activeConnection = ws;
-  let currentMsgIdx = 0;
+  let proxy = proxyRotator.getNextProxy();
 
   ws.on("open", () => {
     console.log("Connected to PumpPortal WebSocket");
@@ -100,17 +118,15 @@ function connect() {
   });
 
   ws.on("message", async (data) => {
-    const message: TokenCreationMsg = JSON.parse(data.toString());
-
-    function getNextComment() {
-      const comment = comments[currentMsgIdx];
-      currentMsgIdx = (currentMsgIdx + 1) % comments.length; // Move to the next comment, wrap around at the end
-      return comment;
+    if (!shouldContinue()) {
+      return;
     }
+
+    const message: TokenCreationMsg = JSON.parse(data.toString());
 
     function generateRandomSentence() {
       function randomWord(length: number) {
-        const letters = "abcdefghijklmnopqrstuvwxyz";
+        const letters = "1234567890";
         let word = "";
         for (let i = 0; i < length; i++) {
           word += letters.charAt(Math.floor(Math.random() * letters.length));
@@ -118,56 +134,35 @@ function connect() {
         return word;
       }
 
-      const word1 = randomWord(Math.floor(Math.random() * 6) + 3); // Random length between 3 and 8
-      const word2 = "FREE TOKEN PASS"; // randomWord(Math.floor(Math.random() * 6) + 3); // Random length between 3 and 8
-      const word3 = randomWord(Math.floor(Math.random() * 6) + 3); // Random length between 3 and 8
+      // Define the desired lengths for each word
+      const lengthWord1 = 2; // Length of the first word
+      const lengthWord2 = 2; // Length of the second word
+      const lengthWord3 = 2; // Length of the third word
 
-      return `${word1} ${word2} ${word3}`;
+      const word1 = randomWord(lengthWord1);
+      const word2 = randomWord(lengthWord1); // This remains constant as per your example
+      const word3 = randomWord(lengthWord3);
+
+      return `${word1} FREE TOKEN PASS ${word1} FOR NEW USERS ${word1}`;
     }
     const comment = generateRandomSentence();
-    // const comment = getNextComment();
-    const sec30 = 30 * 1000;
+    const sec30 = 62 * 1000;
 
     try {
-      const res = await autoCommentByMint(message.mint, comment);
+      const res = await autoCommentByMint(proxy, message.mint, comment, sec30);
       console.log(
-        chalk.green(`Comment on "${message.name}" succeeded! Res:`),
+        chalk.green(
+          `Comment on "${message.name}" succeeded at ${
+            (res as any).retries
+          } retries! Res:`
+        ),
         res.status
       );
     } catch (e) {
-      try {
-        const res = await autoCommentByMint(message.mint, comment);
-        console.log(
-          chalk.green(`Comment on "${message.name}" succeeded! Res:`),
-          res.status
-        );
-      } catch (e) {
-        const err = e as any;
-        console.log(
-          chalk.red(`Comment on "${message.name}" failed: ${err.status}`)
-        );
-      }
-    }
-
-    try {
-      const res = await autoCommentByMint(message.mint, comment, sec30);
-      console.log(
-        chalk.green(`Comment on "${message.name}" succeeded! Res:`),
-        res.status
-      );
-    } catch (e) {
-      // try {
-      //   const res = await autoCommentByMint(message.mint, comment);
-      //   console.log(
-      //     chalk.green(`Comment on "${message.name}" succeeded! Res:`),
-      //     res.status
-      //   );
-      // } catch (e) {
       const err = e as any;
       console.log(
         chalk.red(`Comment on "${message.name}" failed: ${err.status}`)
       );
-      // }
     }
   });
 
@@ -215,6 +210,7 @@ function getRandomCommentMsg(): string {
 }
 
 async function autoCommentByMint(
+  proxy: string,
   mint: string,
   msg?: string,
   delay?: number
@@ -222,7 +218,8 @@ async function autoCommentByMint(
   const commentTxt = msg ? msg : "FREE token-pass! ezpump dot fun";
   const pumpFunService = new PumpFunService();
 
-  const proxy = getRandomProxy();
+  // const proxy = getRandomProxy();
+
   let authCookie: string | null = null;
   const secretKey = createWallet().secretKeyBase58;
 
@@ -230,7 +227,13 @@ async function autoCommentByMint(
     authCookie = await pumpFunService.login(secretKey, proxy);
     if (!authCookie) throw { status: 0 };
   } catch (e) {
-    throw { status: 0 };
+    try {
+      proxy = proxyRotator.getNextProxy();
+      authCookie = await pumpFunService.login(secretKey, proxy);
+      if (!authCookie) throw { status: 0 };
+    } catch (e) {
+      throw { status: 0 };
+    }
   }
 
   try {
@@ -240,12 +243,12 @@ async function autoCommentByMint(
       proxy
     );
   } catch {
-    const newProxy = getRandomProxy();
+    proxy = proxyRotator.getNextProxy();
     try {
       await pumpFunService.updateProfile(
         { profileImage: BOT_IMAGE_GIF, bio: BOT_DESCRIPTION },
         authCookie,
-        newProxy
+        proxy
       );
     } catch (e) {
       console.error("Error during profile update:", (e as AxiosError).status);
@@ -256,30 +259,38 @@ async function autoCommentByMint(
   try {
     proxyToken = await pumpFunService.getProxyToken(authCookie);
   } catch (e) {
-    throw { status: 0 };
+    try {
+      proxyToken = await pumpFunService.getProxyToken(authCookie);
+    } catch (e) {
+      proxy = proxyRotator.getNextProxy();
+      throw { status: 0 };
+    }
   }
 
   return new Promise((resolve, reject) => {
-    setTimeout(async () => {
+    const maxRetries = 1;
+    let retries = 0;
+
+    const attempt = async () => {
       try {
         const res = await pumpFunService.comment(
           commentTxt,
           mint,
           proxyToken,
-          proxy
+          retries === 0 ? proxy : proxyRotator.getNextProxy() // Use original proxy on first attempt
         );
-        resolve(res);
+        resolve({ ...res, retries } as any); // If successful, resolve the promise
       } catch (e) {
-        const newProxy = getRandomProxy();
-        try {
-          resolve(
-            await pumpFunService.comment(commentTxt, mint, proxyToken, newProxy)
-          );
-        } catch (e) {
-          reject(e);
+        retries++;
+        if (retries >= maxRetries) {
+          reject(e); // Reject if max retries reached
+        } else {
+          setTimeout(attempt, delay);
         }
       }
-    }, delay);
+    };
+
+    attempt(); // Start the first attempt
   });
 }
 
