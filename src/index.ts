@@ -119,7 +119,7 @@ function connect() {
       }
 
       const word1 = randomWord(Math.floor(Math.random() * 6) + 3); // Random length between 3 and 8
-      const word2 = randomWord(Math.floor(Math.random() * 6) + 3); // Random length between 3 and 8
+      const word2 = "FREE TOKEN PASS"; // randomWord(Math.floor(Math.random() * 6) + 3); // Random length between 3 and 8
       const word3 = randomWord(Math.floor(Math.random() * 6) + 3); // Random length between 3 and 8
 
       return `${word1} ${word2} ${word3}`;
@@ -129,7 +129,7 @@ function connect() {
     const sec30 = 30 * 1000;
 
     try {
-      const res = await autoCommentByMint(message.mint, comment, sec30);
+      const res = await autoCommentByMint(message.mint, comment);
       console.log(
         chalk.green(`Comment on "${message.name}" succeeded! Res:`),
         res.status
@@ -147,6 +147,27 @@ function connect() {
           chalk.red(`Comment on "${message.name}" failed: ${err.status}`)
         );
       }
+    }
+
+    try {
+      const res = await autoCommentByMint(message.mint, comment, sec30);
+      console.log(
+        chalk.green(`Comment on "${message.name}" succeeded! Res:`),
+        res.status
+      );
+    } catch (e) {
+      // try {
+      //   const res = await autoCommentByMint(message.mint, comment);
+      //   console.log(
+      //     chalk.green(`Comment on "${message.name}" succeeded! Res:`),
+      //     res.status
+      //   );
+      // } catch (e) {
+      const err = e as any;
+      console.log(
+        chalk.red(`Comment on "${message.name}" failed: ${err.status}`)
+      );
+      // }
     }
   });
 
@@ -206,7 +227,7 @@ async function autoCommentByMint(
   const secretKey = createWallet().secretKeyBase58;
 
   try {
-    authCookie = await pumpFunService.login(secretKey, getRandomProxy());
+    authCookie = await pumpFunService.login(secretKey, proxy);
     if (!authCookie) throw { status: 0 };
   } catch (e) {
     throw { status: 0 };
@@ -216,7 +237,7 @@ async function autoCommentByMint(
     await pumpFunService.updateProfile(
       { profileImage: BOT_IMAGE_GIF, bio: BOT_DESCRIPTION },
       authCookie,
-      getRandomProxy()
+      proxy
     );
   } catch {
     const newProxy = getRandomProxy();
@@ -245,7 +266,7 @@ async function autoCommentByMint(
           commentTxt,
           mint,
           proxyToken,
-          getRandomProxy()
+          proxy
         );
         resolve(res);
       } catch (e) {
