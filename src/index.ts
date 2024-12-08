@@ -54,7 +54,7 @@ const proxyRotator = new ProxyRotator(ROTATING_PROXY_LIST);
 
 let lastActionTime = 0;
 function shouldContinue() {
-  const seconds = 0;
+  const seconds = 5;
   const delay = 1000 * seconds;
   const currentTime = Date.now(); // Get the current timestamp in milliseconds
 
@@ -112,59 +112,90 @@ function connect() {
       const word2 = randomWord(lengthWord1); // This remains constant as per your example
       const word3 = randomWord(lengthWord3);
 
-      return `FREE token-pass (${word1}) for new users at: ez AND pump AND . AND fun`;
+      return `FREE token-pass for new users at: ez AND pump. AND fun - No joke! (${word1})`;
     }
     // const comment = generateRandomSentence(); // getNextMessage();
-    const delay = 12 * 1000;
-    const secondDelay = 14 * 1000;
+    const delay = 0 * 1000;
+    const secondDelay = 30 * 1000;
+    const delays = [0, 4, 8, 15].map((el) => el * 1000);
 
-    try {
-      const res = await autoCommentByMint(
-        proxy,
-        message.mint,
-        generateRandomSentence(),
-        delay
-      );
-      commentsCounter++;
-      console.log(
-        chalk.green(
-          `Comment on "${message.name}" succeeded at ${
-            (res as any).retries
-          } retries! Res:`
-        ),
-        res.status
-      );
-      console.log("Comments counter: ", commentsCounter);
-    } catch (e) {
-      const err = e as any;
-      console.log(
-        chalk.red(`Comment on "${message.name}" failed: ${err.status}`)
-      );
-    }
+    (async () => {
+      const promises = delays.map(async (delay, index) => {
+        try {
+          const res = await autoCommentByMint(
+            proxy,
+            message.mint,
+            generateRandomSentence(),
+            delay
+          );
+          commentsCounter++;
+          console.log(
+            chalk.green(
+              `1 - Comment on "${message.mint}" succeeded at ${
+                (res as any).retries
+              } retries! Res:`
+            ),
+            res.status
+          );
+          console.log("Comments counter: ", commentsCounter);
+        } catch (e) {
+          const err = e as any;
+          console.log(
+            chalk.red(`1 - Comment on "${message.name}" failed: ${err.status}`)
+          );
+        }
+      });
 
-    try {
-      const res = await autoCommentByMint(
-        proxy,
-        message.mint,
-        generateRandomSentence(),
-        secondDelay
-      );
-      commentsCounter++;
-      console.log(
-        chalk.green(
-          `Comment on "${message.name}" succeeded at ${
-            (res as any).retries
-          } retries! Res:`
-        ),
-        res.status
-      );
-      console.log("Comments counter: ", commentsCounter);
-    } catch (e) {
-      const err = e as any;
-      console.log(
-        chalk.red(`Comment on "${message.name}" failed: ${err.status}`)
-      );
-    }
+      await Promise.all(promises); // Wait for all requests to complete
+    })();
+
+    // try {
+    //   const res = await autoCommentByMint(
+    //     proxy,
+    //     message.mint,
+    //     generateRandomSentence(),
+    //     delay
+    //   );
+    //   commentsCounter++;
+    //   console.log(
+    //     chalk.green(
+    //       `1 - Comment on "${message.mint}" succeeded at ${
+    //         (res as any).retries
+    //       } retries! Res:`
+    //     ),
+    //     res.status
+    //   );
+    //   console.log("Comments counter: ", commentsCounter);
+    // } catch (e) {
+    //   const err = e as any;
+    //   console.log(
+    //     chalk.red(`1 - Comment on "${message.name}" failed: ${err.status}`)
+    //   );
+    // }
+
+    // try {
+    //   const res = await autoCommentByMint(
+    //     proxy,
+    //     message.mint,
+    //     generateRandomSentence(),
+    //     secondDelay
+    //   );
+    //   commentsCounter++;
+    //   console.log(
+    //     chalk.green(
+    //       `2 - Comment on "${message.mint}" succeeded at ${
+    //         (res as any).retries
+    //       } retries! Res:`
+    //     ),
+    //     res.status
+    //   );
+    //   console.log("Comments counter: ", commentsCounter);
+    // } catch (e) {
+    //   const err = e as any;
+    //   console.log(
+    //     chalk.red(`2 - Comment on "${message.name}" failed: ${err.status}`)
+    //   );
+    // }
   });
 
   ws.on("error", (error) => {
