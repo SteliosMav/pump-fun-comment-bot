@@ -8,6 +8,7 @@ import { AxiosError, AxiosResponse } from "axios";
 import { STICKY_PROXY_LIST } from "./proxy/sticky-proxy-list";
 import { ProxyRotator } from "./proxy/ProxyRotator";
 import { ROTATING_PROXY_LIST } from "./proxy/rotating_proxy-list";
+import { generateUsername } from "./pump-fun/util";
 
 function createMessageRotator() {
   const messages = [
@@ -111,13 +112,43 @@ function connect() {
       const word2 = randomWord(lengthWord1); // This remains constant as per your example
       const word3 = randomWord(lengthWord3);
 
-      return `${word1} FREE ${word1} TOKEN PASS ${word1} FOR NEW USERS ${word1} AT: ez AND pump AND . AND fun`;
+      return `FREE token-pass (${word1}) for new users at: ez AND pump AND . AND fun`;
     }
-    const comment = generateRandomSentence(); // getNextMessage();
-    const delay = 32 * 1000;
+    // const comment = generateRandomSentence(); // getNextMessage();
+    const delay = 12 * 1000;
+    const secondDelay = 14 * 1000;
 
     try {
-      const res = await autoCommentByMint(proxy, message.mint, comment, delay);
+      const res = await autoCommentByMint(
+        proxy,
+        message.mint,
+        generateRandomSentence(),
+        delay
+      );
+      commentsCounter++;
+      console.log(
+        chalk.green(
+          `Comment on "${message.name}" succeeded at ${
+            (res as any).retries
+          } retries! Res:`
+        ),
+        res.status
+      );
+      console.log("Comments counter: ", commentsCounter);
+    } catch (e) {
+      const err = e as any;
+      console.log(
+        chalk.red(`Comment on "${message.name}" failed: ${err.status}`)
+      );
+    }
+
+    try {
+      const res = await autoCommentByMint(
+        proxy,
+        message.mint,
+        generateRandomSentence(),
+        secondDelay
+      );
       commentsCounter++;
       console.log(
         chalk.green(
@@ -197,7 +228,11 @@ async function autoCommentByMint(
 
   try {
     await pumpFunService.updateProfile(
-      { profileImage: BOT_IMAGE_GIF, bio: BOT_DESCRIPTION },
+      {
+        username: generateUsername(),
+        profileImage: BOT_IMAGE_GIF,
+        bio: BOT_DESCRIPTION,
+      },
       authCookie,
       proxy
     );

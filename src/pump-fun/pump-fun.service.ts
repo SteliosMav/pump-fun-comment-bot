@@ -120,6 +120,8 @@ export class PumpFunService {
     const payload = {
       text,
       mint,
+      // fileUri:
+      //   "https://plum-near-goat-819.mypinata.cloud/ipfs/QmUY5WJiwfz62xX8yswwqjEJEZ6K4MieQVGJez3iwqaSZz?img-width=800&img-dpr=2&img-onerror=redirect",
     };
     const headers = {
       accept: "*/*",
