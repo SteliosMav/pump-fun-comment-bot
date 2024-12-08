@@ -1,7 +1,6 @@
 import { PumpFunService } from "./pump-fun/pump-fun.service";
 import { createWallet } from "./wallet/createWallet";
 import chalk from "chalk";
-import { getRandomProxy } from "./proxy/getRandomProxy";
 import { BOT_DESCRIPTION, BOT_IMAGE_GIF } from "./constants";
 import WebSocket from "ws";
 import { AxiosError, AxiosResponse } from "axios";
@@ -54,7 +53,7 @@ const proxyRotator = new ProxyRotator(ROTATING_PROXY_LIST);
 
 let lastActionTime = 0;
 function shouldContinue() {
-  const seconds = 5;
+  const seconds = 0;
   const delay = 1000 * seconds;
   const currentTime = Date.now(); // Get the current timestamp in milliseconds
 
@@ -95,29 +94,34 @@ function connect() {
 
     function generateRandomSentence() {
       function randomWord(length: number) {
-        const letters = "1234567890";
+        const numbers = "23456789";
+        const letters = "abcdefghijklmnopqrstuvwxyz";
+        const chars = numbers;
         let word = "";
         for (let i = 0; i < length; i++) {
-          word += letters.charAt(Math.floor(Math.random() * letters.length));
+          word += chars.charAt(Math.floor(Math.random() * chars.length));
         }
         return word;
       }
 
       // Define the desired lengths for each word
-      const lengthWord1 = 2; // Length of the first word
-      const lengthWord2 = 2; // Length of the second word
-      const lengthWord3 = 2; // Length of the third word
+      const lengthNumber = 3; // Length of the first word
+      const lengthWord1 = 5; // Length of the second word
+      const lengthWord2 = 5; // Length of the third word
 
-      const word1 = randomWord(lengthWord1);
-      const word2 = randomWord(lengthWord1); // This remains constant as per your example
-      const word3 = randomWord(lengthWord3);
+      const number = randomWord(lengthNumber);
+      const word1 = randomWord(lengthWord1); // This remains constant as per your example
+      const word2 = randomWord(lengthWord2);
 
-      return `FREE token-pass for new users at: ez AND pump. AND fun - No joke! (${word1})`;
+      return `ZERO COST token-passes for new users! ${number}`;
+      // return `${word1} ${word2}`;
+      // return `FREE TOKEN PASSES (${word1}) telegram: ez[underscore]pump[underscore]bot`;
     }
     // const comment = generateRandomSentence(); // getNextMessage();
-    const delay = 0 * 1000;
-    const secondDelay = 30 * 1000;
-    const delays = [0, 4, 8, 15].map((el) => el * 1000);
+    const delays = [
+      8,
+      // Math.floor(Math.random() * (60 - 10 + 1)) + 10
+    ].map((el) => el * 1000);
 
     (async () => {
       const promises = delays.map(async (delay, index) => {
@@ -131,7 +135,7 @@ function connect() {
           commentsCounter++;
           console.log(
             chalk.green(
-              `1 - Comment on "${message.mint}" succeeded at ${
+              `Index: ${index} - Comment on "${message.mint}" succeeded at ${
                 (res as any).retries
               } retries! Res:`
             ),
@@ -141,61 +145,15 @@ function connect() {
         } catch (e) {
           const err = e as any;
           console.log(
-            chalk.red(`1 - Comment on "${message.name}" failed: ${err.status}`)
+            chalk.red(
+              `Index: ${index} - Comment on "${message.mint}" failed: ${err.status}`
+            )
           );
         }
       });
 
       await Promise.all(promises); // Wait for all requests to complete
     })();
-
-    // try {
-    //   const res = await autoCommentByMint(
-    //     proxy,
-    //     message.mint,
-    //     generateRandomSentence(),
-    //     delay
-    //   );
-    //   commentsCounter++;
-    //   console.log(
-    //     chalk.green(
-    //       `1 - Comment on "${message.mint}" succeeded at ${
-    //         (res as any).retries
-    //       } retries! Res:`
-    //     ),
-    //     res.status
-    //   );
-    //   console.log("Comments counter: ", commentsCounter);
-    // } catch (e) {
-    //   const err = e as any;
-    //   console.log(
-    //     chalk.red(`1 - Comment on "${message.name}" failed: ${err.status}`)
-    //   );
-    // }
-
-    // try {
-    //   const res = await autoCommentByMint(
-    //     proxy,
-    //     message.mint,
-    //     generateRandomSentence(),
-    //     secondDelay
-    //   );
-    //   commentsCounter++;
-    //   console.log(
-    //     chalk.green(
-    //       `2 - Comment on "${message.mint}" succeeded at ${
-    //         (res as any).retries
-    //       } retries! Res:`
-    //     ),
-    //     res.status
-    //   );
-    //   console.log("Comments counter: ", commentsCounter);
-    // } catch (e) {
-    //   const err = e as any;
-    //   console.log(
-    //     chalk.red(`2 - Comment on "${message.name}" failed: ${err.status}`)
-    //   );
-    // }
   });
 
   ws.on("error", (error) => {
@@ -249,7 +207,7 @@ async function autoCommentByMint(
     if (!authCookie) throw { status: 0 };
   } catch (e) {
     try {
-      proxy = proxyRotator.getNextProxy();
+      // proxy = proxyRotator.getNextProxy();
       authCookie = await pumpFunService.login(secretKey, proxy);
       if (!authCookie) throw { status: 0 };
     } catch (e) {
@@ -268,7 +226,7 @@ async function autoCommentByMint(
       proxy
     );
   } catch {
-    proxy = proxyRotator.getNextProxy();
+    // proxy = proxyRotator.getNextProxy();
     try {
       await pumpFunService.updateProfile(
         { profileImage: BOT_IMAGE_GIF, bio: BOT_DESCRIPTION },
@@ -287,13 +245,13 @@ async function autoCommentByMint(
     try {
       proxyToken = await pumpFunService.getProxyToken(authCookie);
     } catch (e) {
-      proxy = proxyRotator.getNextProxy();
+      // proxy = proxyRotator.getNextProxy();
       throw { status: 0 };
     }
   }
 
   return new Promise((resolve, reject) => {
-    const maxRetries = 1;
+    const maxRetries = 0;
     let retries = 0;
 
     const attempt = async () => {
@@ -302,7 +260,8 @@ async function autoCommentByMint(
           commentTxt,
           mint,
           proxyToken,
-          retries === 0 ? proxy : proxyRotator.getNextProxy() // Use original proxy on first attempt
+          proxy
+          // retries === 0 ? proxy : proxyRotator.getNextProxy() // Use original proxy on first attempt
         );
         resolve({ ...res, retries } as any); // If successful, resolve the promise
       } catch (e) {
