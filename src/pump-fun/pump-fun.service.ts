@@ -7,6 +7,8 @@ import fetch from "node-fetch";
 import { HttpsProxyAgent } from "https-proxy-agent"; // Use https-proxy-agent
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import chalk from "chalk";
+import * as fs from "fs";
+import FormData from "form-data";
 
 export enum TransactionMode {
   Simulation,
@@ -114,7 +116,8 @@ export class PumpFunService {
     text: string,
     mint: string,
     proxyToken: string,
-    proxy: string
+    proxy: string,
+    fileUri: string
   ): Promise<AxiosResponse> {
     const commentUrl = `https://client-proxy-server.pump.fun/comment`;
     const payload = {
@@ -125,6 +128,9 @@ export class PumpFunService {
       // "https://ipfs.io/ipfs/QmU2eoHt1ird9iXRrmcaEvexMBpVx3hZ3ebzvP5GJS4n9v",
       // "https://plum-near-goat-819.mypinata.cloud/ipfs/QmUY5WJiwfz62xX8yswwqjEJEZ6K4MieQVGJez3iwqaSZz?img-width=800&img-dpr=2&img-onerror=redirect",
     };
+    if (fileUri) {
+      (payload as any).fileUri = fileUri;
+    }
     const headers = {
       accept: "*/*",
       "accept-encoding": "gzip, deflate, br, zstd",
@@ -158,5 +164,58 @@ export class PumpFunService {
     };
 
     return axios(config);
+  }
+
+  async uploadImageToIPFS(authCookie: string) {
+    const url = "https://pump.fun/api/ipfs-file";
+
+    // Prepare headers
+    const headers = {
+      accept: "*/*",
+      "accept-encoding": "gzip, deflate, br, zstd",
+      "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
+      cookie: authCookie,
+      origin: "https://pump.fun",
+      referer:
+        "https://pump.fun/coin/6VabzsMTG4jrDftU4xVGiNaPMaJm6SsgttF8iacHpump",
+      "sec-ch-ua":
+        '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": '"Windows"',
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      "user-agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    };
+
+    // Create form-data with the image file
+    const formData = new FormData();
+    formData.append(
+      "file",
+      fs.createReadStream("./images/test-19.jpg"),
+      "test-19.jpg"
+    );
+
+    // Merge form-data headers with custom headers
+    const combinedHeaders = {
+      ...headers,
+      ...formData.getHeaders(),
+    };
+
+    try {
+      // Make the POST request
+      const response = await axios.post(url, formData, {
+        headers: combinedHeaders,
+      });
+
+      if (response.status === 200) {
+        return response.data.fileUri;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      return null;
+    }
   }
 }

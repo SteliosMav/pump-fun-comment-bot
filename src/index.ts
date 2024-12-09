@@ -53,7 +53,7 @@ const proxyRotator = new ProxyRotator(ROTATING_PROXY_LIST);
 
 let lastActionTime = 0;
 function shouldContinue() {
-  const seconds = 0;
+  const seconds = 2;
   const delay = 1000 * seconds;
   const currentTime = Date.now(); // Get the current timestamp in milliseconds
 
@@ -96,7 +96,7 @@ function connect() {
       function randomWord(length: number) {
         const numbers = "23456789";
         const letters = "abcdefghijklmnopqrstuvwxyz";
-        const chars = numbers;
+        const chars = letters;
         let word = "";
         for (let i = 0; i < length; i++) {
           word += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -108,18 +108,20 @@ function connect() {
       const lengthNumber = 3; // Length of the first word
       const lengthWord1 = 5; // Length of the second word
       const lengthWord2 = 5; // Length of the third word
+      const lengthWord3 = 5; // Length of the third word
 
       const number = randomWord(lengthNumber);
       const word1 = randomWord(lengthWord1); // This remains constant as per your example
       const word2 = randomWord(lengthWord2);
+      const word3 = randomWord(lengthWord3);
 
-      return `ZERO COST token-passes for new users! ${number}`;
-      // return `${word1} ${word2}`;
+      // return `(${number}) 🎁 FREE token-passes! 🎁 (${number})`;
+      return `${word1} ${word2} ${word3}`;
       // return `FREE TOKEN PASSES (${word1}) telegram: ez[underscore]pump[underscore]bot`;
     }
     // const comment = generateRandomSentence(); // getNextMessage();
     const delays = [
-      8,
+      8, 34,
       // Math.floor(Math.random() * (60 - 10 + 1)) + 10
     ].map((el) => el * 1000);
 
@@ -250,8 +252,10 @@ async function autoCommentByMint(
     }
   }
 
+  const fileUri = await pumpFunService.uploadImageToIPFS(authCookie);
+
   return new Promise((resolve, reject) => {
-    const maxRetries = 0;
+    const maxRetries = 3;
     let retries = 0;
 
     const attempt = async () => {
@@ -260,7 +264,8 @@ async function autoCommentByMint(
           commentTxt,
           mint,
           proxyToken,
-          proxy
+          proxy,
+          fileUri
           // retries === 0 ? proxy : proxyRotator.getNextProxy() // Use original proxy on first attempt
         );
         resolve({ ...res, retries } as any); // If successful, resolve the promise
