@@ -7,12 +7,14 @@ export class ProxyRotator {
       throw new Error("Proxies must be a non-empty array.");
     }
     this.proxies = proxies;
-    this.index = 700;
+    this.index = 0;
   }
 
   getNextProxy() {
     const proxy = this.proxies[this.index];
-    if (this.index >= this.proxies.length) {
+    return proxy;
+    const isLast = this.index + 1 >= this.proxies.length;
+    if (isLast) {
       this.index = 0;
     } else {
       this.index++;

@@ -1,5 +1,5 @@
 import { PumpFunService } from "../pump-fun/pump-fun.service";
-import { createWallet } from "../wallet/createWallet";
+import { createWallet } from "../solana/createWallet";
 import chalk from "chalk";
 import { BOT_DESCRIPTION, BOT_IMAGE_GIF } from "../constants";
 import WebSocket from "ws";
@@ -7,10 +7,11 @@ import { AxiosError, AxiosResponse } from "axios";
 import { ProxyRotator } from "../proxy/ProxyRotator";
 import { ROTATING_PROXY_LIST } from "../proxy/rotating_proxy-list";
 import { generateUsername } from "../pump-fun/util";
+import { BasicController } from "../controllers/basic.controller";
 
-export interface TokenCreationMsg {
+export interface TokenCreationEvent {
   signature: string; // Unique signature of the transaction
-  mint: string; // Unique identifier for the token
+  mint?: string; // Unique identifier for the token
   traderPublicKey: string; // Public key of the trader
   txType: "create"; // Transaction type (always 'create' for token creation)
   initialBuy: number; // Initial amount of tokens purchased
@@ -26,7 +27,7 @@ export interface TokenCreationMsg {
 // Track active connection
 let activeConnection: WebSocket | null = null;
 
-export function connect(cb: Function) {
+export function connect(controller: BasicController) {
   if (activeConnection) {
     console.log("Connection already active, skipping new connection.");
     return;
@@ -43,8 +44,8 @@ export function connect(cb: Function) {
   });
 
   ws.on("message", async (data) => {
-    const message: TokenCreationMsg = JSON.parse(data.toString());
-    cb(message);
+    const message: TokenCreationEvent = JSON.parse(data.toString());
+    controller.handleEvent(message);
   });
 
   ws.on("error", (error) => {

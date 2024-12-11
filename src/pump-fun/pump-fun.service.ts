@@ -120,17 +120,11 @@ export class PumpFunService {
     fileUri?: string
   ): Promise<AxiosResponse> {
     const commentUrl = `https://client-proxy-server.pump.fun/comment`;
-    const payload = {
+    const payload: { text: string; mint: string; fileUri?: string } = {
       text,
       mint,
-      // fileUri:
-      //   "https://ipfs.io/ipfs/QmSv7CHohQU36VdgAKA1wFx5Q71xPFAyTbf5izfiMaj8Wb",
-      // "https://ipfs.io/ipfs/QmU2eoHt1ird9iXRrmcaEvexMBpVx3hZ3ebzvP5GJS4n9v",
-      // "https://plum-near-goat-819.mypinata.cloud/ipfs/QmUY5WJiwfz62xX8yswwqjEJEZ6K4MieQVGJez3iwqaSZz?img-width=800&img-dpr=2&img-onerror=redirect",
     };
-    if (fileUri) {
-      (payload as any).fileUri = fileUri;
-    }
+    if (fileUri) payload.fileUri = fileUri;
     const headers = {
       accept: "*/*",
       "accept-encoding": "gzip, deflate, br, zstd",
@@ -166,7 +160,7 @@ export class PumpFunService {
     return axios(config);
   }
 
-  async uploadImageToIPFS(authCookie: string) {
+  async uploadImageToIPFS(authCookie: string): Promise<string> {
     const url = "https://pump.fun/api/ipfs-file";
 
     // Prepare headers
@@ -203,19 +197,8 @@ export class PumpFunService {
       ...formData.getHeaders(),
     };
 
-    try {
-      // Make the POST request
-      const response = await axios.post(url, formData, {
-        headers: combinedHeaders,
-      });
-
-      if (response.status === 200) {
-        return response.data.fileUri;
-      } else {
-        return null;
-      }
-    } catch (error) {
-      return null;
-    }
+    return await axios.post(url, formData, {
+      headers: combinedHeaders,
+    });
   }
 }
