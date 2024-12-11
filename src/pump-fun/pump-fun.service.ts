@@ -117,7 +117,7 @@ export class PumpFunService {
     mint: string,
     proxyToken: string,
     proxy: string,
-    fileUri: string
+    fileUri?: string
   ): Promise<AxiosResponse> {
     const commentUrl = `https://client-proxy-server.pump.fun/comment`;
     const payload = {
@@ -193,8 +193,8 @@ export class PumpFunService {
     const formData = new FormData();
     formData.append(
       "file",
-      fs.createReadStream("./images/test-19.jpg"),
-      "test-19.jpg"
+      fs.createReadStream("./images/test-1.jpg"),
+      "test-1.jpg"
     );
 
     // Merge form-data headers with custom headers

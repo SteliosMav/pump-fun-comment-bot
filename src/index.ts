@@ -75,7 +75,6 @@ function connect() {
 
   const ws = new WebSocket("wss://pumpportal.fun/api/data");
   activeConnection = ws;
-  let proxy = proxyRotator.getNextProxy();
   const getNextMessage = createMessageRotator();
 
   ws.on("open", () => {
@@ -86,9 +85,11 @@ function connect() {
   });
 
   ws.on("message", async (data) => {
-    if (!shouldContinue()) {
-      return;
-    }
+    // if (!shouldContinue()) {
+    //   return;
+    // }
+
+    let proxy = proxyRotator.getNextProxy();
 
     const message: TokenCreationMsg = JSON.parse(data.toString());
 
@@ -96,7 +97,7 @@ function connect() {
       function randomWord(length: number) {
         const numbers = "23456789";
         const letters = "abcdefghijklmnopqrstuvwxyz";
-        const chars = letters;
+        const chars = numbers;
         let word = "";
         for (let i = 0; i < length; i++) {
           word += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -115,8 +116,8 @@ function connect() {
       const word2 = randomWord(lengthWord2);
       const word3 = randomWord(lengthWord3);
 
-      // return `(${number}) 🎁 FREE token-passes! 🎁 (${number})`;
-      return `${word1} ${word2} ${word3}`;
+      return `(${number}) 🎁 FREE token-passes! 🎁 (${number})`;
+      // return `${word1} ${word2} ${word3}`;
       // return `FREE TOKEN PASSES (${word1}) telegram: ez[underscore]pump[underscore]bot`;
     }
     // const comment = generateRandomSentence(); // getNextMessage();
@@ -137,7 +138,7 @@ function connect() {
           commentsCounter++;
           console.log(
             chalk.green(
-              `Index: ${index} - Comment on "${message.mint}" succeeded at ${
+              `Comment on "${message.mint}" succeeded at ${
                 (res as any).retries
               } retries! Res:`
             ),
@@ -147,9 +148,7 @@ function connect() {
         } catch (e) {
           const err = e as any;
           console.log(
-            chalk.red(
-              `Index: ${index} - Comment on "${message.mint}" failed: ${err.status}`
-            )
+            chalk.red(`Comment on "${message.mint}" failed: ${err.status}`)
           );
         }
       });
@@ -252,7 +251,8 @@ async function autoCommentByMint(
     }
   }
 
-  const fileUri = await pumpFunService.uploadImageToIPFS(authCookie);
+  // const fileUri = await pumpFunService.uploadImageToIPFS(authCookie);
+  // if (!fileUri) throw { status: 0 };
 
   return new Promise((resolve, reject) => {
     const maxRetries = 3;
@@ -264,8 +264,8 @@ async function autoCommentByMint(
           commentTxt,
           mint,
           proxyToken,
-          proxy,
-          fileUri
+          proxy
+          // fileUri
           // retries === 0 ? proxy : proxyRotator.getNextProxy() // Use original proxy on first attempt
         );
         resolve({ ...res, retries } as any); // If successful, resolve the promise
