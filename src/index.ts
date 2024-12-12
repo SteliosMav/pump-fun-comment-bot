@@ -1,8 +1,6 @@
-import {
-  AccountState,
-  TokenCreatedController,
-} from "./controllers/token-created-controller/token-created-controller";
-import { DependencyContainer } from "./lib/dependency-container/dependency-container";
+import { AccountState } from "./account-state/account-state";
+import { TokenCreatedController } from "./controllers/token-created-controller/token-created-controller";
+import { DependencyContainer } from "./dependency-container/dependency-container";
 import { connect } from "./listener/pump-fun-portal-listener";
 import { ProxyRotator } from "./proxy/ProxyRotator";
 import { ROTATING_PROXY_LIST } from "./proxy/rotating_proxy-list";
@@ -16,8 +14,7 @@ container.register(new PumpFunService());
 container.register(
   new AccountState(
     container.resolve(ProxyRotator),
-    container.resolve(PumpFunService),
-    10
+    container.resolve(PumpFunService)
   )
 );
 

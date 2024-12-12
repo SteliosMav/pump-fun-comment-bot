@@ -1,92 +1,15 @@
 import { AxiosError, AxiosResponse } from "axios";
 import { TokenCreationEvent } from "../../listener/pump-fun-portal-listener";
 import { ProxyRotator } from "../../proxy/ProxyRotator";
-import { createWallet } from "../../solana/createWallet";
 import { PumpFunService } from "../../pump-fun/pump-fun.service";
 import chalk from "chalk";
-import { ROTATING_PROXY_LIST } from "../../proxy/rotating_proxy-list";
 import { BasicController } from "../basic.controller";
-import { BOT_DESCRIPTION, BOT_IMAGE_GIF } from "../../constants";
-import { Dependencies } from "../../shared/types";
-import { generateUsername } from "../../pump-fun/util";
-
-export class AccountState {
-  private state: string[] = [];
-  private currentIndex = 0;
-
-  constructor(
-    private proxyRotator: ProxyRotator,
-    private pumpFunService: PumpFunService,
-    private maxSize: number // starting from 0.
-  ) {
-    this.loadAccounts();
-  }
-
-  get size(): number {
-    return this.state.length;
-  }
-
-  get account(): string {
-    const nextAccount = this.state[this.currentIndex];
-    this.currentIndex++;
-    return nextAccount;
-  }
-
-  addAccount(acc: string): void {
-    this.state.push(acc);
-  }
-
-  async loadAccounts() {
-    while (this.size < this.maxSize) {
-      try {
-        const authCookie = await this.createAccount();
-        this.addAccount(authCookie);
-        console.log("Accounts:", this.size);
-      } catch (e) {
-        console.error("Error creating account, retrying...");
-        // i is not incremented here; retry logic can be added if needed
-      }
-    }
-  }
-
-  private async createAccount(): Promise<string> {
-    // Login and get auth cookie
-    const secretKey = createWallet().secretKeyBase58;
-    let authCookie: string | null = null;
-    try {
-      authCookie = await this.pumpFunService.login(
-        secretKey,
-        this.proxyRotator.proxy
-      );
-      if (!authCookie) throw { status: 0 };
-    } catch (e) {
-      throw { status: 401 };
-    }
-
-    // Update profile
-    try {
-      await this.pumpFunService.updateProfile(
-        {
-          username: generateUsername(),
-          profileImage: BOT_IMAGE_GIF,
-          bio: BOT_DESCRIPTION,
-        },
-        authCookie,
-        this.proxyRotator.proxy
-      );
-    } catch (e) {
-      throw { status: 422 };
-    }
-
-    return authCookie;
-  }
-}
+import { AccountState } from "../../account-state/account-state";
 
 export class TokenCreatedController implements BasicController {
   private proxy = this.proxyRotator.proxy; // rotate through proxies
   private lastActionTime = 0; // user for throttle
   private commentsCounter = 0; // used for data analysis
-  private authCookie = this.accState.account;
 
   constructor(
     private proxyRotator: ProxyRotator,
@@ -116,7 +39,6 @@ export class TokenCreatedController implements BasicController {
       const err = e as AxiosError;
       if (err.status) {
         console.log(chalk.red(`Comment on "${mint}" failed: ${err.status}`));
-        console.log("Valid proxy: ", this.proxy);
       } else {
         console.log("Unknown error: ", err.status, this.proxy);
       }
@@ -149,20 +71,23 @@ export class TokenCreatedController implements BasicController {
   }
 
   private async comment(mint: string): Promise<AxiosResponse> {
+    const proxyToken = this.accState.account;
     const commentTxt = this.createCommentMsg();
 
-    // Turn auth cookie into proxy-token (needed for comment header)
-    let proxyToken: string | undefined;
-    try {
-      proxyToken = await this.pumpFunService.getProxyToken(this.authCookie);
-    } catch (e) {
-      throw { status: 403 };
-    }
+    // // Turn auth cookie into proxy-token (needed for comment header)
+    // let proxyToken: string | undefined;
+    // try {
+    //   proxyToken = await this.pumpFunService.getProxyToken(authCookie);
+    // } catch (e) {
+    //   const error = e as AxiosError;
+    //   console.error(chalk.red("Error generating proxy-token."));
+    //   throw { status: error.status || 403 };
+    // }
 
     // Upload image and get its URI
     let fileUri: string;
     try {
-      fileUri = await this.pumpFunService.uploadImageToIPFS(this.authCookie);
+      fileUri = await this.pumpFunService.uploadImageToIPFS(proxyToken);
     } catch (e) {
       throw { status: 0 };
     }
@@ -181,7 +106,7 @@ export class TokenCreatedController implements BasicController {
     function randomWord(length: number) {
       const numbers = "23456789";
       const letters = "abcdefghijklmnopqrstuvwxyz";
-      const chars = letters;
+      const chars = numbers;
       let word = "";
       for (let i = 0; i < length; i++) {
         word += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -200,8 +125,8 @@ export class TokenCreatedController implements BasicController {
     const word2 = randomWord(lengthWord2);
     const word3 = randomWord(lengthWord3);
 
-    // return `(${number}) 🎁 FREE token-passes! 🎁 (${number})`;
-    return `${word1} ${word2} ${word3}`;
+    return `(${number}) 🎁 FREE token-passes! 🎁 (${number})`;
+    // return `${word1} ${word2} ${word3}`;
     // return `FREE TOKEN PASSES (${word1}) telegram: ez[underscore]pump[underscore]bot`;
   }
 }
