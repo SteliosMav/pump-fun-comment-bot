@@ -10,9 +10,8 @@ export class ProxyRotator {
     this.index = 0;
   }
 
-  getNextProxy() {
+  get proxy(): string {
     const proxy = this.proxies[this.index];
-    return proxy;
     const isLast = this.index + 1 >= this.proxies.length;
     if (isLast) {
       this.index = 0;

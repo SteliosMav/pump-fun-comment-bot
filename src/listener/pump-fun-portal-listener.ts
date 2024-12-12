@@ -50,26 +50,26 @@ export function connect(controller: BasicController) {
 
   ws.on("error", (error) => {
     console.error(`WebSocket error: ${error.message}`);
-    restart(ws);
+    restart(ws, controller);
   });
 
   ws.on("close", () => {
     console.log("WebSocket connection closed.");
-    restart(ws);
+    restart(ws, controller);
   });
 
   process.on("uncaughtException", (err) => {
     console.error("Uncaught Exception:", err);
-    restart(ws); // Exit after logging
+    restart(ws, controller); // Exit after logging
   });
 
   process.on("unhandledRejection", (reason, promise) => {
     console.error("Unhandled Rejection:", reason);
-    restart(ws);
+    restart(ws, controller);
   });
 }
 
-async function restart(ws: WebSocket) {
+async function restart(ws: WebSocket, controller: BasicController) {
   if (ws && ws.readyState !== WebSocket.CLOSED) {
     console.log("Closing existing WebSocket connection...");
     ws.terminate();
@@ -77,5 +77,5 @@ async function restart(ws: WebSocket) {
 
   activeConnection = null; // Reset active connection
   console.log("Restarting WebSocket connection in 5 seconds...");
-  setTimeout(connect, 5000); // Restart after a delay
+  setTimeout(() => connect(controller), 5000); // Restart after a delay
 }

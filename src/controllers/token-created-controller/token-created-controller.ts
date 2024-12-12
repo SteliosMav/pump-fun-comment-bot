@@ -6,21 +6,93 @@ import { PumpFunService } from "../../pump-fun/pump-fun.service";
 import chalk from "chalk";
 import { ROTATING_PROXY_LIST } from "../../proxy/rotating_proxy-list";
 import { BasicController } from "../basic.controller";
+import { BOT_DESCRIPTION, BOT_IMAGE_GIF } from "../../constants";
+import { Dependencies } from "../../shared/types";
+import { generateUsername } from "../../pump-fun/util";
 
 export class AccountState {
-  private state: Map<string, string> = new Map();
+  private state: string[] = [];
+  private currentIndex = 0;
+
+  constructor(
+    private proxyRotator: ProxyRotator,
+    private pumpFunService: PumpFunService,
+    private maxSize: number // starting from 0.
+  ) {
+    this.loadAccounts();
+  }
+
+  get size(): number {
+    return this.state.length;
+  }
+
+  get account(): string {
+    const nextAccount = this.state[this.currentIndex];
+    this.currentIndex++;
+    return nextAccount;
+  }
+
+  addAccount(acc: string): void {
+    this.state.push(acc);
+  }
+
+  async loadAccounts() {
+    while (this.size < this.maxSize) {
+      try {
+        const authCookie = await this.createAccount();
+        this.addAccount(authCookie);
+        console.log("Accounts:", this.size);
+      } catch (e) {
+        console.error("Error creating account, retrying...");
+        // i is not incremented here; retry logic can be added if needed
+      }
+    }
+  }
+
+  private async createAccount(): Promise<string> {
+    // Login and get auth cookie
+    const secretKey = createWallet().secretKeyBase58;
+    let authCookie: string | null = null;
+    try {
+      authCookie = await this.pumpFunService.login(
+        secretKey,
+        this.proxyRotator.proxy
+      );
+      if (!authCookie) throw { status: 0 };
+    } catch (e) {
+      throw { status: 401 };
+    }
+
+    // Update profile
+    try {
+      await this.pumpFunService.updateProfile(
+        {
+          username: generateUsername(),
+          profileImage: BOT_IMAGE_GIF,
+          bio: BOT_DESCRIPTION,
+        },
+        authCookie,
+        this.proxyRotator.proxy
+      );
+    } catch (e) {
+      throw { status: 422 };
+    }
+
+    return authCookie;
+  }
 }
 
 export class TokenCreatedController implements BasicController {
-  // Init dependencies
-  private proxyRotator = new ProxyRotator(ROTATING_PROXY_LIST);
-  private pumpFunService = new PumpFunService();
-
-  private proxy = this.proxyRotator.getNextProxy(); // rotate through proxies
+  private proxy = this.proxyRotator.proxy; // rotate through proxies
   private lastActionTime = 0; // user for throttle
   private commentsCounter = 0; // used for data analysis
+  private authCookie = this.accState.account;
 
-  constructor() {}
+  constructor(
+    private proxyRotator: ProxyRotator,
+    private pumpFunService: PumpFunService,
+    private accState: AccountState
+  ) {}
 
   handleEvent(event: TokenCreationEvent) {
     const validEvent = this.isValid(event);
@@ -50,7 +122,7 @@ export class TokenCreatedController implements BasicController {
       }
     }
 
-    this.proxy = this.proxyRotator.getNextProxy();
+    this.proxy = this.proxyRotator.proxy;
   }
 
   private isValid(
@@ -78,44 +150,11 @@ export class TokenCreatedController implements BasicController {
 
   private async comment(mint: string): Promise<AxiosResponse> {
     const commentTxt = this.createCommentMsg();
-    const secretKey = createWallet().secretKeyBase58;
-    let authCookie: string | null = null;
-
-    // Login and get auth cookie
-    try {
-      authCookie = await this.pumpFunService.login(secretKey, this.proxy);
-      if (!authCookie) throw { status: 0 };
-    } catch (e) {
-      throw { status: 401 };
-    }
-
-    // try {
-    //   await this.pumpFunService.updateProfile(
-    //     {
-    //       username: generateUsername(),
-    //       profileImage: BOT_IMAGE_GIF,
-    //       bio: BOT_DESCRIPTION,
-    //     },
-    //     authCookie,
-    //     proxy
-    //   );
-    // } catch {
-    //   // proxy = proxyRotator.getNextProxy();
-    //   try {
-    //     await this.pumpFunService.updateProfile(
-    //       { profileImage: BOT_IMAGE_GIF, bio: BOT_DESCRIPTION },
-    //       authCookie,
-    //       proxy
-    //     );
-    //   } catch (e) {
-    //     console.error("Error during profile update:", (e as AxiosError).status);
-    //   }
-    // }
 
     // Turn auth cookie into proxy-token (needed for comment header)
     let proxyToken: string | undefined;
     try {
-      proxyToken = await this.pumpFunService.getProxyToken(authCookie);
+      proxyToken = await this.pumpFunService.getProxyToken(this.authCookie);
     } catch (e) {
       throw { status: 403 };
     }
@@ -123,7 +162,7 @@ export class TokenCreatedController implements BasicController {
     // Upload image and get its URI
     let fileUri: string;
     try {
-      fileUri = await this.pumpFunService.uploadImageToIPFS(authCookie);
+      fileUri = await this.pumpFunService.uploadImageToIPFS(this.authCookie);
     } catch (e) {
       throw { status: 0 };
     }
