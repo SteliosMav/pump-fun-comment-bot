@@ -7,5 +7,5 @@ export const BOT_TOKEN_PASS_PRICE = toSolDecimals(0.07);
 export const BOT_IMAGE_GIF =
   "https://plum-near-goat-819.mypinata.cloud/ipfs/QmRSbGEC7Ezikm4WXm45DuTsmoLYbYXNkZRvHfyC9KEnv7";
 // Bot description must be maximum 250 characters
-export const BOT_DESCRIPTION = `🎁FREE token-pass for new users! 🌐WEBPAGE (remove T): ezTpumpT.fun. TELEGRAM (remove T): ezT_pumpT_bot. The most reliable, cheap and easy to use!`;
+export const BOT_DESCRIPTION = `🎁FREE token-pass for new users! 🌐WEBPAGE (combine words): "ez" AND "pump" AND ".fun" | TELEGRAM (combine words): "ez_" AND "pump_" AND "bot". The most reliable, cheap and easy to use!`;
 export const PUMP_FUN_API = "https://frontend-api.pump.fun";
