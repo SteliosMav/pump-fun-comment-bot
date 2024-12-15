@@ -38,9 +38,13 @@ export class TokenCreatedController implements BasicController {
     } catch (e) {
       const err = e as AxiosError;
       if (err.status) {
-        console.log(chalk.red(`Comment on "${mint}" failed: ${err.status}`));
+        console.log(
+          chalk.red(
+            `Comment on "${mint}" failed: ${err.status}. Error message: ${err.message}`
+          )
+        );
       } else {
-        console.log("Unknown error: ", err.status, this.proxy);
+        console.log("Unknown error: ", err.status, err.message, this.proxy);
       }
     }
 
@@ -125,7 +129,7 @@ export class TokenCreatedController implements BasicController {
     const word2 = randomWord(lengthWord2);
     const word3 = randomWord(lengthWord3);
 
-    return `(${number}) 🎁 FREE token-passes! 🎁 (${number})`;
+    return `🎁 FREE TOKEN PASSES! (${number}) 🌐Website (combine): "ez" and "pump.fun" ➤Telegram: "@ez_" and "pump_bot"`;
     // return `${word1} ${word2} ${word3}`;
     // return `FREE TOKEN PASSES (${word1}) telegram: ez[underscore]pump[underscore]bot`;
   }
