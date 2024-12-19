@@ -5,6 +5,13 @@ import { PumpFunService } from "../../pump-fun/pump-fun.service";
 import chalk from "chalk";
 import { BasicController } from "../basic.controller";
 import { AccountState } from "../../account-state/account-state";
+import {
+  COMMENT_DELAY,
+  COMMENT_MODE,
+  DELAYS,
+  TIMES_TO_COMMENT,
+} from "../../config";
+import { CommentGenerator } from "../../comment-generator/comment-generator";
 
 export class TokenCreatedController implements BasicController {
   private proxy = this.proxyRotator.proxy; // rotate through proxies
@@ -14,6 +21,7 @@ export class TokenCreatedController implements BasicController {
   constructor(
     private proxyRotator: ProxyRotator,
     private pumpFunService: PumpFunService,
+    private commentGenerator: CommentGenerator,
     private accState: AccountState
   ) {}
 
@@ -22,13 +30,27 @@ export class TokenCreatedController implements BasicController {
 
     if (!validEvent) return;
 
-    this.processEvent(validEvent);
+    // Call the function X times
+    if (DELAYS.length) {
+      for (let i = 0; i < TIMES_TO_COMMENT; i++) {
+        setTimeout(() => this.processEvent(validEvent), DELAYS[i]);
+      }
+    } else {
+      for (let i = 0; i < TIMES_TO_COMMENT; i++) {
+        if (COMMENT_DELAY) {
+          setTimeout(() => this.processEvent(validEvent), COMMENT_DELAY);
+        } else {
+          this.processEvent(validEvent);
+        }
+      }
+    }
   }
 
   private async processEvent(
     event: TokenCreationEvent & { mint: string }
   ): Promise<void> {
-    const mint = event.mint;
+    const mint =
+      COMMENT_MODE.type === "specific-token" ? COMMENT_MODE.mint : event.mint;
 
     try {
       await this.comment(mint);
@@ -76,25 +98,15 @@ export class TokenCreatedController implements BasicController {
 
   private async comment(mint: string): Promise<AxiosResponse> {
     const proxyToken = this.accState.account;
-    const commentTxt = this.createCommentMsg();
+    const commentTxt = this.commentGenerator.comment;
 
-    // // Turn auth cookie into proxy-token (needed for comment header)
-    // let proxyToken: string | undefined;
+    // // Upload image and get its URI
+    // let fileUri: string;
     // try {
-    //   proxyToken = await this.pumpFunService.getProxyToken(authCookie);
+    //   fileUri = await this.pumpFunService.uploadImageToIPFS(proxyToken);
     // } catch (e) {
-    //   const error = e as AxiosError;
-    //   console.error(chalk.red("Error generating proxy-token."));
-    //   throw { status: error.status || 403 };
+    //   throw { status: 0 };
     // }
-
-    // Upload image and get its URI
-    let fileUri: string;
-    try {
-      fileUri = await this.pumpFunService.uploadImageToIPFS(proxyToken);
-    } catch (e) {
-      throw { status: 0 };
-    }
 
     // Post comment
     return this.pumpFunService.comment(
@@ -104,33 +116,5 @@ export class TokenCreatedController implements BasicController {
       this.proxy
       // fileUri
     );
-  }
-
-  private createCommentMsg() {
-    function randomWord(length: number) {
-      const numbers = "23456789";
-      const letters = "abcdefghijklmnopqrstuvwxyz";
-      const chars = numbers;
-      let word = "";
-      for (let i = 0; i < length; i++) {
-        word += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return word;
-    }
-
-    // Define the desired lengths for each word
-    const lengthNumber = 3; // Length of the first word
-    const lengthWord1 = 5; // Length of the second word
-    const lengthWord2 = 5; // Length of the third word
-    const lengthWord3 = 5; // Length of the third word
-
-    const number = randomWord(lengthNumber);
-    const word1 = randomWord(lengthWord1); // This remains constant as per your example
-    const word2 = randomWord(lengthWord2);
-    const word3 = randomWord(lengthWord3);
-
-    return `🎁 FREE TOKEN PASSES! (${number}) 🌐Website (combine): "ez" and "pump.fun" ➤Telegram: "@ez_" and "pump_bot"`;
-    // return `${word1} ${word2} ${word3}`;
-    // return `FREE TOKEN PASSES (${word1}) telegram: ez[underscore]pump[underscore]bot`;
   }
 }

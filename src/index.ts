@@ -1,4 +1,5 @@
 import { AccountState } from "./account-state/account-state";
+import { CommentGenerator } from "./comment-generator/comment-generator";
 import { TokenCreatedController } from "./controllers/token-created-controller/token-created-controller";
 import { DependencyContainer } from "./dependency-container/dependency-container";
 import { connect } from "./listener/pump-fun-portal-listener";
@@ -11,6 +12,7 @@ const container = new DependencyContainer();
 // Register dependencies
 container.register(new ProxyRotator(ROTATING_PROXY_LIST));
 container.register(new PumpFunService());
+container.register(new CommentGenerator());
 container.register(
   new AccountState(
     container.resolve(ProxyRotator),
@@ -22,6 +24,7 @@ container.register(
 const tokenCreatedController = new TokenCreatedController(
   container.resolve(ProxyRotator),
   container.resolve(PumpFunService),
+  container.resolve(CommentGenerator),
   container.resolve(AccountState)
 );
 

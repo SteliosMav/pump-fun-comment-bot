@@ -5,10 +5,11 @@ import { PumpFunService } from "../pump-fun/pump-fun.service";
 import { generateUsername } from "../pump-fun/util";
 import { createWallet } from "../solana/createWallet";
 import chalk from "chalk";
+import { CONCURRENT_ACCOUNT_CREATION, MAX_ACCOUNT_SIZE } from "../config";
 
 export class AccountState {
   private state: string[] = [];
-  private maxSize = 2000; // starting from 0.
+  private maxSize = MAX_ACCOUNT_SIZE;
   private currentIndex = 0;
 
   constructor(
@@ -33,7 +34,7 @@ export class AccountState {
   }
 
   async loadAccounts() {
-    const concurrentLimit = 5; // Number of accounts to create in parallel
+    const concurrentLimit = CONCURRENT_ACCOUNT_CREATION;
 
     while (this.size < this.maxSize) {
       const remainingSlots = this.maxSize - this.size;
@@ -43,7 +44,6 @@ export class AccountState {
         try {
           const authCookie = await this.createAccount();
           this.addAccount(authCookie);
-          console.log("Accounts:", this.size);
         } catch (e) {
           console.error("Error creating account, skipping...");
           // Handle errors appropriately, e.g., logging or retries
