@@ -1,4 +1,4 @@
-import { AccountState } from "./account-state/account-state";
+import { AccountGenerator } from "./account-generator/account-generator";
 import { CommentGenerator } from "./comment-generator/comment-generator";
 import { TokenCreatedController } from "./controllers/token-created-controller/token-created-controller";
 import { DependencyContainer } from "./dependency-container/dependency-container";
@@ -14,7 +14,7 @@ container.register(new ProxyRotator(ROTATING_PROXY_LIST));
 container.register(new PumpFunService());
 container.register(new CommentGenerator());
 container.register(
-  new AccountState(
+  new AccountGenerator(
     container.resolve(ProxyRotator),
     container.resolve(PumpFunService)
   )
@@ -25,7 +25,7 @@ const tokenCreatedController = new TokenCreatedController(
   container.resolve(ProxyRotator),
   container.resolve(PumpFunService),
   container.resolve(CommentGenerator),
-  container.resolve(AccountState)
+  container.resolve(AccountGenerator)
 );
 
 // Initiate the WebSocket connection

@@ -11,7 +11,7 @@ import {
   PROFILE_FIELDS_TO_UPDATE,
 } from "../config";
 
-export class AccountState {
+export class AccountGenerator {
   private state: string[] = [];
   private minAccountsAhead = ACCOUNTS_AHEAD.min;
   private maxAccountsAhead = ACCOUNTS_AHEAD.max;
@@ -58,11 +58,17 @@ export class AccountState {
         { length: concurrentLimit },
         async () => {
           try {
-            const authCookie = await this.createAccount();
-            this.addAccount(authCookie);
+            const authCookie = await this.generateAccount();
+            const proxyToken = await this.pumpFunService.getProxyToken(
+              authCookie
+            );
+            this.addAccount(proxyToken);
           } catch (e) {
-            console.error("Error creating account, skipping...");
-            // Handle errors appropriately, e.g., logging or retries
+            console.error(
+              `Error creating account. Status: ${
+                (e as AxiosError).status
+              }. Skipping...`
+            );
           }
         }
       );
@@ -73,9 +79,15 @@ export class AccountState {
     this.isLoadingAccounts = false;
   }
 
-  private async createAccount(): Promise<string> {
-    // Login and get auth cookie
+  /**
+   * @description Generate an account, updates its profile and returns the authCookie
+   * to be used as headers: { Cookie: authCookie },
+   */
+  private async generateAccount(): Promise<string> {
+    // Generate wallet and get secret key
     const secretKey = createWallet().secretKeyBase58;
+
+    // Login and get auth cookie
     let authCookie: string | null = null;
     try {
       authCookie = await this.pumpFunService.login(
@@ -108,16 +120,6 @@ export class AccountState {
       }
     }
 
-    // Turn auth cookie into proxy-token (needed for comment header)
-    let proxyToken: string | undefined;
-    try {
-      proxyToken = await this.pumpFunService.getProxyToken(authCookie);
-    } catch (e) {
-      const error = e as AxiosError;
-      console.error(chalk.red("Error generating proxy-token."));
-      throw { status: error.status || 403 };
-    }
-
-    return proxyToken;
+    return authCookie;
   }
 }

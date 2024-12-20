@@ -4,7 +4,7 @@ import { ProxyRotator } from "../../proxy/ProxyRotator";
 import { PumpFunService } from "../../pump-fun/pump-fun.service";
 import chalk from "chalk";
 import { BasicController } from "../basic.controller";
-import { AccountState } from "../../account-state/account-state";
+import { AccountGenerator } from "../../account-generator/account-generator";
 import { COMMENT_MODE, DELAYS } from "../../config";
 import { CommentGenerator } from "../../comment-generator/comment-generator";
 
@@ -17,7 +17,7 @@ export class TokenCreatedController implements BasicController {
     private proxyRotator: ProxyRotator,
     private pumpFunService: PumpFunService,
     private commentGenerator: CommentGenerator,
-    private accState: AccountState
+    private accState: AccountGenerator
   ) {}
 
   handleEvent(event: TokenCreationEvent) {
