@@ -5,7 +5,11 @@ import { PumpFunService } from "../pump-fun/pump-fun.service";
 import { generateUsername } from "../pump-fun/util";
 import { createWallet } from "../solana/createWallet";
 import chalk from "chalk";
-import { CONCURRENT_ACCOUNT_CREATION, MAX_ACCOUNT_SIZE } from "../config";
+import {
+  CONCURRENT_ACCOUNT_CREATION,
+  MAX_ACCOUNT_SIZE,
+  PROFILE_FIELDS_TO_UPDATE,
+} from "../config";
 
 export class AccountState {
   private state: string[] = [];
@@ -69,18 +73,24 @@ export class AccountState {
     }
 
     // Update profile
-    try {
-      await this.pumpFunService.updateProfile(
-        {
-          username: generateUsername(),
-          profileImage: BOT_IMAGE_GIF,
-          bio: BOT_DESCRIPTION,
-        },
-        authCookie,
-        this.proxyRotator.proxy
-      );
-    } catch (e) {
-      throw { status: 422 };
+    if (PROFILE_FIELDS_TO_UPDATE.length) {
+      try {
+        await this.pumpFunService.updateProfile(
+          {
+            username: generateUsername(),
+            profileImage: PROFILE_FIELDS_TO_UPDATE.includes("image")
+              ? BOT_IMAGE_GIF
+              : "",
+            bio: PROFILE_FIELDS_TO_UPDATE.includes("bio")
+              ? BOT_DESCRIPTION
+              : "",
+          },
+          authCookie,
+          this.proxyRotator.proxy
+        );
+      } catch (e) {
+        throw { status: 422 };
+      }
     }
 
     // Turn auth cookie into proxy-token (needed for comment header)

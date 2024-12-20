@@ -5,12 +5,7 @@ import { PumpFunService } from "../../pump-fun/pump-fun.service";
 import chalk from "chalk";
 import { BasicController } from "../basic.controller";
 import { AccountState } from "../../account-state/account-state";
-import {
-  COMMENT_DELAY,
-  COMMENT_MODE,
-  DELAYS,
-  TIMES_TO_COMMENT,
-} from "../../config";
+import { COMMENT_MODE, DELAYS } from "../../config";
 import { CommentGenerator } from "../../comment-generator/comment-generator";
 
 export class TokenCreatedController implements BasicController {
@@ -31,17 +26,12 @@ export class TokenCreatedController implements BasicController {
     if (!validEvent) return;
 
     // Call the function X times
-    if (DELAYS.length) {
-      for (let i = 0; i < TIMES_TO_COMMENT; i++) {
-        setTimeout(() => this.processEvent(validEvent), DELAYS[i]);
-      }
-    } else {
-      for (let i = 0; i < TIMES_TO_COMMENT; i++) {
-        if (COMMENT_DELAY) {
-          setTimeout(() => this.processEvent(validEvent), COMMENT_DELAY);
-        } else {
-          this.processEvent(validEvent);
-        }
+    for (let i = 0; i < DELAYS.length; i++) {
+      const delay = DELAYS[i];
+      if (delay) {
+        setTimeout(() => this.processEvent(validEvent), delay);
+      } else {
+        this.processEvent(validEvent);
       }
     }
   }
