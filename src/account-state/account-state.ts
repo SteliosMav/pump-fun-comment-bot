@@ -7,14 +7,16 @@ import { createWallet } from "../solana/createWallet";
 import chalk from "chalk";
 import {
   CONCURRENT_ACCOUNT_CREATION,
-  MAX_ACCOUNT_SIZE,
+  ACCOUNTS_AHEAD,
   PROFILE_FIELDS_TO_UPDATE,
 } from "../config";
 
 export class AccountState {
   private state: string[] = [];
-  private maxSize = MAX_ACCOUNT_SIZE;
+  private minAccountsAhead = ACCOUNTS_AHEAD.min;
+  private maxAccountsAhead = ACCOUNTS_AHEAD.max;
   private currentIndex = 0;
+  private isLoadingAccounts = false;
 
   constructor(
     private proxyRotator: ProxyRotator,
@@ -30,7 +32,16 @@ export class AccountState {
   get account(): string {
     const nextAccount = this.state[this.currentIndex];
     this.currentIndex++;
+
+    if (this.remainingSlots <= this.minAccountsAhead) {
+      this.loadAccounts();
+    }
+
     return nextAccount;
+  }
+
+  get remainingSlots(): number {
+    return this.size + 1 - (this.currentIndex + 1);
   }
 
   addAccount(acc: string): void {
@@ -38,24 +49,28 @@ export class AccountState {
   }
 
   async loadAccounts() {
+    if (this.isLoadingAccounts) return;
+    this.isLoadingAccounts = true;
+
     const concurrentLimit = CONCURRENT_ACCOUNT_CREATION;
-
-    while (this.size < this.maxSize) {
-      const remainingSlots = this.maxSize - this.size;
-      const batchSize = Math.min(concurrentLimit, remainingSlots);
-
-      const accountPromises = Array.from({ length: batchSize }, async () => {
-        try {
-          const authCookie = await this.createAccount();
-          this.addAccount(authCookie);
-        } catch (e) {
-          console.error("Error creating account, skipping...");
-          // Handle errors appropriately, e.g., logging or retries
+    while (this.remainingSlots <= this.maxAccountsAhead) {
+      const accountPromises = Array.from(
+        { length: concurrentLimit },
+        async () => {
+          try {
+            const authCookie = await this.createAccount();
+            this.addAccount(authCookie);
+          } catch (e) {
+            console.error("Error creating account, skipping...");
+            // Handle errors appropriately, e.g., logging or retries
+          }
         }
-      });
+      );
 
       await Promise.all(accountPromises);
     }
+
+    this.isLoadingAccounts = false;
   }
 
   private async createAccount(): Promise<string> {

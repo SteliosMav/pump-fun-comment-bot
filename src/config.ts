@@ -5,6 +5,6 @@ export const DELAYS = [0, 1000 * 10]; // If exists, it will overwrite the above 
 export const COMMENT_MODE: CommentMode = { type: "new-tokens" }; // Comment on new tokens or a specific token
 
 // Account state
-export const MAX_ACCOUNT_SIZE = 10000; // Starting from 0. Maximum number of accounts to create
+export const ACCOUNTS_AHEAD = { min: 50, max: 100 }; // Starting from 0. Maximum number of accounts to create
 export const CONCURRENT_ACCOUNT_CREATION = 30; // Number of accounts to create in parallel
 export const PROFILE_FIELDS_TO_UPDATE: ("image" | "bio")[] = ["bio", "image"]; // Update account profiles with bot's information
