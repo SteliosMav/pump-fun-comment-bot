@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node-dev --respawn src/index.ts",
+    "start:no-watch": "ts-node --transpile-only src/index.ts",
     "draft": "ts-node-dev draft.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
