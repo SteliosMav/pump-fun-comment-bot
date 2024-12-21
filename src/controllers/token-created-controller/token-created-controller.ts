@@ -5,7 +5,7 @@ import { PumpFunService } from "../../pump-fun/pump-fun.service";
 import chalk from "chalk";
 import { BasicController } from "../basic.controller";
 import { AccountGenerator } from "../../account-generator/account-generator";
-import { COMMENT_MODE, DELAYS } from "../../config";
+import { ACCOUNT_SOURCE, COMMENT_MODE, DELAYS } from "../../config";
 import { CommentGenerator } from "../../comment-generator/comment-generator";
 
 export class TokenCreatedController implements BasicController {
@@ -17,8 +17,12 @@ export class TokenCreatedController implements BasicController {
     private proxyRotator: ProxyRotator,
     private pumpFunService: PumpFunService,
     private commentGenerator: CommentGenerator,
-    private accState: AccountGenerator
-  ) {}
+    private accGen: AccountGenerator
+  ) {
+    if (ACCOUNT_SOURCE === "generator") {
+      accGen.load();
+    }
+  }
 
   handleEvent(event: TokenCreationEvent) {
     const validEvent = this.isValid(event);
@@ -87,7 +91,7 @@ export class TokenCreatedController implements BasicController {
   }
 
   private async comment(mint: string): Promise<AxiosResponse> {
-    const proxyToken = this.accState.account;
+    const proxyToken = this.accGen.account;
     const commentTxt = this.commentGenerator.comment;
 
     // // Upload image and get its URI

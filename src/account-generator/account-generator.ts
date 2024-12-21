@@ -21,9 +21,7 @@ export class AccountGenerator {
   constructor(
     private proxyRotator: ProxyRotator,
     private pumpFunService: PumpFunService
-  ) {
-    this.loadAccounts();
-  }
+  ) {}
 
   get size(): number {
     return this.state.length;
@@ -34,7 +32,7 @@ export class AccountGenerator {
     this.currentIndex++;
 
     if (this.remainingSlots <= this.minAccountsAhead) {
-      this.loadAccounts();
+      this.load();
     }
 
     return nextAccount;
@@ -48,7 +46,7 @@ export class AccountGenerator {
     this.state.push(acc);
   }
 
-  async loadAccounts() {
+  async load() {
     if (this.isLoadingAccounts) return;
     this.isLoadingAccounts = true;
 
