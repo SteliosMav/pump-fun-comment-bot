@@ -5,7 +5,7 @@ import { PumpFunService } from "../../pump-fun/pump-fun.service";
 import chalk from "chalk";
 import { BasicController } from "../basic.controller";
 import { AccountGenerator } from "../../account-generator/account-generator";
-import { ACCOUNT_SOURCE, COMMENT_MODE, DELAYS } from "../../config";
+import { COMMENT_MODE, DELAYS } from "../../config";
 import { CommentGenerator } from "../../comment-generator/comment-generator";
 
 export class TokenCreatedController implements BasicController {
@@ -19,9 +19,7 @@ export class TokenCreatedController implements BasicController {
     private commentGenerator: CommentGenerator,
     private accGen: AccountGenerator
   ) {
-    if (ACCOUNT_SOURCE === "generator") {
-      accGen.load();
-    }
+    accGen.load();
   }
 
   handleEvent(event: TokenCreationEvent) {
