@@ -61,19 +61,13 @@ export class AccountGenerator {
               authCookie
             );
             this.addAccount(proxyToken);
-          } catch (e) {
-            console.error(
-              `Error creating account. Status: ${
-                (e as AxiosError).status
-              }. Skipping...`
-            );
-          }
+          } catch (e) {}
         }
       );
-
       await Promise.all(accountPromises);
     }
 
+    console.log("Accounts loaded! Remaining slots:", this.remainingSlots);
     this.isLoadingAccounts = false;
   }
 

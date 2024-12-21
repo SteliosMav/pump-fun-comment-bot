@@ -24,7 +24,9 @@ export class TokenCreatedController implements BasicController {
   handleEvent(event: TokenCreationEvent) {
     const validEvent = this.isValid(event);
 
+    // Run checks
     if (!validEvent) return;
+    if (!this.accGen.remainingSlots) return;
 
     // Call the function X times
     for (let i = 0; i < DELAYS.length; i++) {
