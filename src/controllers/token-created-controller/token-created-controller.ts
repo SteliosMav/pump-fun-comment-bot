@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosResponse, isAxiosError } from "axios";
+import { isAxiosError } from "axios";
 import { TokenCreationEvent } from "../../listeners/pump-fun-portal-listener";
 import { ProxyRotator } from "../../proxy/proxy-rotator";
 import { PumpFunService } from "../../pump-fun/pump-fun.service";
@@ -22,11 +22,14 @@ export class TokenCreatedController implements BasicController {
   }
 
   handleEvent(event: TokenCreationEvent) {
-    const validEvent = this.isValid(event);
-
     // Run checks
-    if (!validEvent) return;
-    if (!this.accGen.hasSufficientAccounts) return;
+    const errMsg = this.runChecks(event);
+    if (errMsg) {
+      console.log(chalk.yellow("Event skipped:", errMsg));
+      return;
+    }
+
+    const validEvent = event as TokenCreationEvent & { mint: string };
 
     // Call the function X times
     for (let i = 0; i < DELAYS.length; i++) {
@@ -37,6 +40,16 @@ export class TokenCreatedController implements BasicController {
         this.processEvent(validEvent);
       }
     }
+  }
+
+  private runChecks(event: TokenCreationEvent): null | string {
+    if (!event.mint) {
+      return "No mint provided";
+    }
+    if (!this.accGen.hasSufficientAccounts) {
+      return "Not enough accounts";
+    }
+    return null;
   }
 
   private async processEvent(
@@ -64,16 +77,23 @@ export class TokenCreatedController implements BasicController {
           // Expected error: something went wrong with SSL certificate and proxy
           console.error(chalk.red("SSL certificate error:"), e.code);
         } else if ([500, 502].includes(e.status)) {
-          // Expected error: pump.fun server error probably due to overload or proxy overload
+          // Possible error: pump.fun or proxy server overload
           console.log(
             chalk.red(
-              `Error while commenting. Status ${e.status}: ${e.response?.statusText}`
+              `Comment failed due to a pump.fun or proxy server overload. Status: ${e.status}`
             )
           );
         } else {
           // Unexpected error
-          console.log(chalk.red("Error response data:"), e.response?.data);
-          console.log(chalk.yellow("Whole error:"), e);
+          const importantData = {
+            status: e.response?.status,
+            statusText: e.response?.statusText,
+            data: e.response?.data,
+          };
+          console.log(
+            chalk.red("Unexpected error while commenting:"),
+            importantData
+          );
         }
       } else {
         // Unexpected error
@@ -82,15 +102,5 @@ export class TokenCreatedController implements BasicController {
     }
 
     this.proxy = this.proxyRotator.proxy;
-  }
-
-  private isValid(
-    event: TokenCreationEvent
-  ): (TokenCreationEvent & { mint: string }) | null {
-    // Validation logic
-    if (!event.mint) return null;
-
-    // Ensure "mint" is a string
-    return { ...event, mint: event.mint };
   }
 }
