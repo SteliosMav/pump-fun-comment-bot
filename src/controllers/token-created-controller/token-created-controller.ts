@@ -7,6 +7,7 @@ import { BasicController } from "../basic.controller";
 import { AccountGenerator } from "../../account-generator/account-generator";
 import { COMMENT_MODE, DELAYS } from "../../config";
 import { CommentGenerator } from "../../comment-generator/comment-generator";
+import { ExceptionFilter } from "../exception-filter";
 
 export class TokenCreatedController implements BasicController {
   private proxy = this.proxyRotator.proxy; // rotate through proxies
@@ -72,33 +73,7 @@ export class TokenCreatedController implements BasicController {
         )
       );
     } catch (e) {
-      if (isAxiosError(e)) {
-        if (!e.status) {
-          // Expected error: something went wrong with SSL certificate and proxy
-          console.error(chalk.red("SSL certificate error:"), e.code);
-        } else if ([500, 502].includes(e.status)) {
-          // Possible error: pump.fun or proxy server overload
-          console.log(
-            chalk.red(
-              `Comment failed due to a pump.fun or proxy server overload. Status: ${e.status}`
-            )
-          );
-        } else {
-          // Unexpected error
-          const importantData = {
-            status: e.response?.status,
-            statusText: e.response?.statusText,
-            data: e.response?.data,
-          };
-          console.log(
-            chalk.red("Unexpected error while commenting:"),
-            importantData
-          );
-        }
-      } else {
-        // Unexpected error
-        console.error(chalk.red("Non-Axios error:"), e);
-      }
+      ExceptionFilter(e);
     }
 
     this.proxy = this.proxyRotator.proxy;
