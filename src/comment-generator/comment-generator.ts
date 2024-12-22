@@ -1,4 +1,4 @@
-import { COMMENT_MODE } from "../config";
+import { COMMENT_MODE, SAFE_COMMENTS } from "../config";
 import { COMMENTS } from "./comments";
 
 export class CommentGenerator {
@@ -32,11 +32,11 @@ export class CommentGenerator {
     return comment;
   }
 
-  private createCommentMsg() {
-    function randomWord(length: number) {
+  private createCommentMsg(): string {
+    function randomWord(length: number, type: "number" | "letter") {
       const numbers = "23456789";
       const letters = "abcdefghijklmnopqrstuvwxyz";
-      const chars = numbers;
+      const chars = type === "letter" ? letters : numbers;
       let word = "";
       for (let i = 0; i < length; i++) {
         word += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -44,18 +44,16 @@ export class CommentGenerator {
       return word;
     }
 
-    // Define the desired lengths for each word
-    const lengthNumber = 3; // Length of the first word
-    const lengthWord1 = 5; // Length of the second word
-    const lengthWord2 = 5; // Length of the third word
-    const lengthWord3 = 5; // Length of the third word
+    const number = randomWord(3, "number");
+    const word1 = randomWord(5, "letter"); // This remains constant as per your example
+    const word2 = randomWord(5, "letter");
+    const word3 = randomWord(5, "letter");
 
-    const number = randomWord(lengthNumber);
-    const word1 = randomWord(lengthWord1); // This remains constant as per your example
-    const word2 = randomWord(lengthWord2);
-    const word3 = randomWord(lengthWord3);
-
-    return `🎁 FREE TOKEN PASSES! (${number}) 🎁  Add "ez" to "pump.fun" 🌐`;
+    if (SAFE_COMMENTS) {
+      return number + " " + this.getNextComment();
+    } else {
+      return `🎁 FREE TOKEN PASSES! (${number}) 🎁  Add "ez" to "pump.fun" 🌐`;
+    }
     // return `${word1} ${word2} ${word3}`;
     // return `FREE TOKEN PASSES (${word1}) telegram: ez[underscore]pump[underscore]bot`;
   }

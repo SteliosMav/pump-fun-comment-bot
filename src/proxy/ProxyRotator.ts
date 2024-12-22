@@ -1,14 +1,12 @@
-export class ProxyRotator {
-  private proxies: string[];
-  private index: number;
+import { USE_STICKY_PROXY } from "../config";
+import { ROTATING_PROXY_LIST } from "./rotating_proxy-list";
+import { STICKY_PROXY_LIST } from "./sticky-proxy-list";
 
-  constructor(proxies: string[]) {
-    if (!Array.isArray(proxies) || proxies.length === 0) {
-      throw new Error("Proxies must be a non-empty array.");
-    }
-    this.proxies = proxies;
-    this.index = 0;
-  }
+export class ProxyRotator {
+  private proxies = USE_STICKY_PROXY ? STICKY_PROXY_LIST : ROTATING_PROXY_LIST;
+  private index = 0;
+
+  constructor() {}
 
   get proxy(): string {
     const proxy = this.proxies[this.index];
