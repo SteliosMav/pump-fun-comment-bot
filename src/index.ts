@@ -2,8 +2,8 @@ import { AccountGenerator } from "./account-generator/account-generator";
 import { CommentGenerator } from "./comment-generator/comment-generator";
 import { TokenCreatedController } from "./controllers/token-created-controller/token-created-controller";
 import { DependencyContainer } from "./dependency-container/dependency-container";
-import { connect } from "./listener/pump-fun-portal-listener";
-import { ProxyRotator } from "./proxy/ProxyRotator";
+import { connect } from "./listeners/pump-fun-portal-listener";
+import { ProxyRotator } from "./proxy/proxy-rotator";
 import { PumpFunService } from "./pump-fun/pump-fun.service";
 
 const container = new DependencyContainer();

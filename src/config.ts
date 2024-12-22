@@ -7,7 +7,7 @@ export const SAFE_COMMENTS = false; // Use comments that won't be detected as sp
 
 // Account generator
 export const ACCOUNTS_AHEAD = { min: 100, max: 200 }; // Starting from 0. Maximum number of accounts to create
-export const CONCURRENT_ACCOUNT_CREATION = 15 * DELAYS.length; // Number of accounts to create in parallel
+export const CONCURRENT_ACCOUNT_CREATION = 20 * DELAYS.length; // Number of accounts to create in parallel
 export const PROFILE_FIELDS_TO_UPDATE: ("image" | "bio" | "username")[] = [
   "username",
   "image",

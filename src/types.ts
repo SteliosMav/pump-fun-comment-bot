@@ -1,4 +1,4 @@
-import { ProxyRotator } from "./proxy/ProxyRotator";
+import { ProxyRotator } from "./proxy/proxy-rotator";
 import { PumpFunService } from "./pump-fun/pump-fun.service";
 
 export interface Dependencies {

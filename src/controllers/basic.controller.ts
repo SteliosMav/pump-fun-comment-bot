@@ -1,4 +1,4 @@
-import { TokenCreationEvent } from "../listener/pump-fun-portal-listener";
+import { TokenCreationEvent } from "../listeners/pump-fun-portal-listener";
 
 export abstract class BasicController {
   handleEvent(event: TokenCreationEvent) {}

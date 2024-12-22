@@ -1,14 +1,15 @@
 import { AxiosError } from "axios";
 import { BOT_DESCRIPTION, BOT_IMAGE_GIF } from "../constants";
-import { ProxyRotator } from "../proxy/ProxyRotator";
+import { ProxyRotator } from "../proxy/proxy-rotator";
 import { PumpFunService } from "../pump-fun/pump-fun.service";
-import { generateUsername } from "../pump-fun/util";
-import { createWallet } from "../solana/createWallet";
+import { generateUsername } from "../pump-fun/utils";
+import { createWallet } from "../solana/create-wallet";
 import chalk from "chalk";
 import {
   CONCURRENT_ACCOUNT_CREATION,
   ACCOUNTS_AHEAD,
   PROFILE_FIELDS_TO_UPDATE,
+  DELAYS,
 } from "../config";
 
 export class AccountGenerator {
@@ -40,6 +41,11 @@ export class AccountGenerator {
 
   get remainingSlots(): number {
     return this.size + 1 - (this.currentIndex + 1);
+  }
+
+  get hasSufficientAccounts(): boolean {
+    const accountsNeeded = DELAYS.length;
+    return this.remainingSlots - accountsNeeded >= 0;
   }
 
   addAccount(acc: string): void {

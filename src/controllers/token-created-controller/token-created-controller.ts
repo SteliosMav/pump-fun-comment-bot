@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosResponse, isAxiosError } from "axios";
-import { TokenCreationEvent } from "../../listener/pump-fun-portal-listener";
-import { ProxyRotator } from "../../proxy/ProxyRotator";
+import { TokenCreationEvent } from "../../listeners/pump-fun-portal-listener";
+import { ProxyRotator } from "../../proxy/proxy-rotator";
 import { PumpFunService } from "../../pump-fun/pump-fun.service";
 import chalk from "chalk";
 import { BasicController } from "../basic.controller";
@@ -26,7 +26,7 @@ export class TokenCreatedController implements BasicController {
 
     // Run checks
     if (!validEvent) return;
-    if (!this.accGen.remainingSlots) return;
+    if (!this.accGen.hasSufficientAccounts) return;
 
     // Call the function X times
     for (let i = 0; i < DELAYS.length; i++) {
@@ -60,12 +60,23 @@ export class TokenCreatedController implements BasicController {
       );
     } catch (e) {
       if (isAxiosError(e)) {
-        console.log(
-          chalk.red(
-            `Error while commenting. Status ${e.status}: ${e.response?.statusText}`
-          )
-        );
+        if (!e.status) {
+          // Expected error: something went wrong with SSL certificate and proxy
+          console.error(chalk.red("SSL certificate error:"), e.code);
+        } else if ([500, 502].includes(e.status)) {
+          // Expected error: pump.fun server error probably due to overload or proxy overload
+          console.log(
+            chalk.red(
+              `Error while commenting. Status ${e.status}: ${e.response?.statusText}`
+            )
+          );
+        } else {
+          // Unexpected error
+          console.log(chalk.red("Error response data:"), e.response?.data);
+          console.log(chalk.yellow("Whole error:"), e);
+        }
       } else {
+        // Unexpected error
         console.error(chalk.red("Non-Axios error:"), e);
       }
     }

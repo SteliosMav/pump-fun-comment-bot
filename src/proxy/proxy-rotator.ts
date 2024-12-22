@@ -1,5 +1,5 @@
 import { USE_STICKY_PROXY } from "../config";
-import { ROTATING_PROXY_LIST } from "./rotating_proxy-list";
+import { ROTATING_PROXY_LIST } from "./rotating-proxy-list";
 import { STICKY_PROXY_LIST } from "./sticky-proxy-list";
 
 export class ProxyRotator {

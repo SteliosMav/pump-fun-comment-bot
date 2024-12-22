@@ -1,12 +1,12 @@
 import { PumpFunService } from "../pump-fun/pump-fun.service";
-import { createWallet } from "../solana/createWallet";
+import { createWallet } from "../solana/create-wallet";
 import chalk from "chalk";
 import { BOT_DESCRIPTION, BOT_IMAGE_GIF } from "../constants";
 import WebSocket from "ws";
 import { AxiosError, AxiosResponse } from "axios";
-import { ProxyRotator } from "../proxy/ProxyRotator";
-import { ROTATING_PROXY_LIST } from "../proxy/rotating_proxy-list";
-import { generateUsername } from "../pump-fun/util";
+import { ProxyRotator } from "../proxy/proxy-rotator";
+import { ROTATING_PROXY_LIST } from "../proxy/rotating-proxy-list";
+import { generateUsername } from "../pump-fun/utils";
 import { BasicController } from "../controllers/basic.controller";
 
 export interface TokenCreationEvent {
