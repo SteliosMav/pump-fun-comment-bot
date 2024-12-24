@@ -1,8 +1,9 @@
 import { COMMENT_MODE, SAFE_COMMENTS } from "../config";
-import { COMMENTS } from "./comments";
+import { BOOST_COMMENTS } from "./boost-comments";
+import { NEUTRAL_COMMENTS } from "./neutral-comments";
 
 export class CommentGenerator {
-  private comments = COMMENTS;
+  private comments = NEUTRAL_COMMENTS;
   private index: number = 0;
 
   constructor() {}
@@ -45,16 +46,12 @@ export class CommentGenerator {
     }
 
     const number = randomWord(3, "number");
-    const word1 = randomWord(5, "letter"); // This remains constant as per your example
-    const word2 = randomWord(5, "letter");
-    const word3 = randomWord(5, "letter");
+    const word1 = randomWord(5, "letter");
 
     if (SAFE_COMMENTS) {
-      return number + " " + this.getNextComment();
+      return this.getNextComment();
     } else {
-      return `🎁 FREE TOKEN PASSES! (${number}) 🎁  Add "ez" to "pump.fun" 🌐`;
+      return `🎁 FREE passes! (${number}) 🎁  Add "ez" to "pump.fun" 🌐`;
     }
-    // return `${word1} ${word2} ${word3}`;
-    // return `FREE TOKEN PASSES (${word1}) telegram: ez[underscore]pump[underscore]bot`;
   }
 }

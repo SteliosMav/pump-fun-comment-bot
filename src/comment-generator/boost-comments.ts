@@ -1,5 +1,5 @@
 // Example usage
-export const COMMENTS = [
+export const BOOST_COMMENTS = [
   "This will go up!",
   "I love this one!",
   "To the moon!",
