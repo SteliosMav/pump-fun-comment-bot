@@ -1,4 +1,4 @@
-import { COMMENT_MODE, SAFE_COMMENTS } from "../config";
+import { COMMENT_MODE } from "../config";
 import { BOOST_COMMENTS } from "./boost-comments";
 import { NEUTRAL_COMMENTS } from "./neutral-comments";
 
@@ -8,9 +8,9 @@ export class CommentGenerator {
 
   constructor() {}
 
-  get comment() {
+  getComment(safe: boolean): string {
     if (COMMENT_MODE.type === "new-tokens") {
-      return this.createCommentMsg();
+      return this.generateComment(safe);
     } else if (COMMENT_MODE.type === "specific-token") {
       return this.getNextComment();
     } else {
@@ -33,7 +33,7 @@ export class CommentGenerator {
     return comment;
   }
 
-  private createCommentMsg(): string {
+  private generateComment(safe: boolean): string {
     function randomWord(length: number, type: "number" | "letter") {
       const numbers = "23456789";
       const letters = "abcdefghijklmnopqrstuvwxyz";
@@ -48,7 +48,7 @@ export class CommentGenerator {
     const number = randomWord(3, "number");
     const word1 = randomWord(5, "letter");
 
-    if (SAFE_COMMENTS) {
+    if (safe) {
       return this.getNextComment();
     } else {
       return `🎁 FREE passes! (${number}) 🎁  Add "ez" to "pump.fun" 🌐`;

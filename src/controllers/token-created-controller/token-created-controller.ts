@@ -5,7 +5,7 @@ import { PumpFunService } from "../../pump-fun/pump-fun.service";
 import chalk from "chalk";
 import { BasicController } from "../basic.controller";
 import { AccountGenerator } from "../../account-generator/account-generator";
-import { COMMENT_MODE, DELAYS } from "../../config";
+import { COMMENT_MODE, COMMENT_CONFIG_LIST } from "../../config";
 import { CommentGenerator } from "../../comment-generator/comment-generator";
 import { ExceptionFilter } from "../exception-filter";
 
@@ -33,12 +33,12 @@ export class TokenCreatedController implements BasicController {
     const validEvent = event as TokenCreationEvent & { mint: string };
 
     // Call the function X times
-    for (let i = 0; i < DELAYS.length; i++) {
-      const delay = DELAYS[i];
+    for (let i = 0; i < COMMENT_CONFIG_LIST.length; i++) {
+      const { delay, safe } = COMMENT_CONFIG_LIST[i];
       if (delay) {
-        setTimeout(() => this.processEvent(validEvent), delay);
+        setTimeout(() => this.processEvent(validEvent, safe), delay);
       } else {
-        this.processEvent(validEvent);
+        this.processEvent(validEvent, safe);
       }
     }
   }
@@ -54,14 +54,15 @@ export class TokenCreatedController implements BasicController {
   }
 
   private async processEvent(
-    event: TokenCreationEvent & { mint: string }
+    event: TokenCreationEvent & { mint: string },
+    safeComment: boolean
   ): Promise<void> {
     const mint =
       COMMENT_MODE.type === "specific-token" ? COMMENT_MODE.mint : event.mint;
 
     try {
       await this.pumpFunService.comment(
-        this.commentGenerator.comment,
+        this.commentGenerator.getComment(safeComment),
         mint,
         this.accGen.account,
         this.proxy

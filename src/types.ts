@@ -8,3 +8,8 @@ export interface Dependencies {
 export type CommentMode =
   | { type: "new-tokens" }
   | { type: "specific-token"; mint: string };
+
+export interface CommentConfig {
+  delay: number; // Delays between requests in milliseconds
+  safe: boolean; // Use comments that won't be detected as spam
+}

@@ -9,7 +9,7 @@ import {
   CONCURRENT_ACCOUNT_CREATION,
   ACCOUNTS_AHEAD,
   PROFILE_FIELDS_TO_UPDATE,
-  DELAYS,
+  COMMENT_CONFIG_LIST,
 } from "../config";
 
 export class AccountGenerator {
@@ -44,7 +44,7 @@ export class AccountGenerator {
   }
 
   get hasSufficientAccounts(): boolean {
-    const accountsNeeded = DELAYS.length;
+    const accountsNeeded = COMMENT_CONFIG_LIST.length;
     return this.remainingSlots - accountsNeeded >= 0;
   }
 
