@@ -3,8 +3,15 @@ import { CommentConfig, CommentMode } from "./types";
 // Commenting
 export const COMMENT_CONFIG_LIST: CommentConfig[] = [
   { delay: 0, safe: true },
-  { delay: 30, safe: false },
-  { delay: 60, safe: false },
+  { delay: 0, safe: true },
+  { delay: 0, safe: true },
+  { delay: 0, safe: true },
+  { delay: 0, safe: true },
+  { delay: 0, safe: true },
+  { delay: 0, safe: true },
+  { delay: 0, safe: true },
+  { delay: 0, safe: true },
+  { delay: 0, safe: true },
 ];
 export const COMMENT_MODE: CommentMode = { type: "new-tokens" }; // Comment on new tokens or a specific token
 
